@@ -1,6 +1,7 @@
 package com.anatawa12.modPatching
 
 import com.anatawa12.modPatching.internal.*
+import com.anatawa12.modPatching.internal.CommonConstants.PATCHING_DIR_NAME
 import com.anatawa12.modPatching.internal.Constants.COPY_MODS_INTO_MODS_DIR
 import net.minecraftforge.gradle.user.patcherUser.forge.ForgePlugin
 import org.gradle.api.Plugin
@@ -26,5 +27,11 @@ open class ModPatchingPlugin : Plugin<Project> {
         project.tasks.getByName("setupCiWorkspace").dependsOn(prepareMods)
         project.tasks.getByName("setupDecompWorkspace").dependsOn(prepareMods)
         project.tasks.getByName("setupDevWorkspace").dependsOn(prepareMods)
+
+        project.afterEvaluate {
+            val patchingModsDir = project.projectDir.resolve(PATCHING_DIR_NAME)
+            patchingModsDir.mkdirs()
+            patchingModsDir.resolve(".gitkeep").writeText("")
+        }
     }
 }

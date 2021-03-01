@@ -54,7 +54,7 @@ val rtm = mods.curse(id = "id", version = "version")
 
 patching {
    patch(rtm) {
-      sourceTreeName = "" // by default, "" means same as id.
+      sourceTreeName = "" // by default, id.
       onRepo = OnRepoPatchSource.MODIFIED // default
       onRepo = OnRepoPatchSource.ALL
       onVCS = OnVCSPatchSource.MODIFIED

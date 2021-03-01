@@ -5,6 +5,7 @@ import net.minecraftforge.gradle.user.patcherUser.forge.ForgePlugin
 import okhttp3.internal.toHexString
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.tasks.SourceSetContainer
 import java.io.File
 
 object Util {
@@ -54,6 +55,8 @@ object Util {
     private val ESCAPED_DISALLOWED = Array(FILESYSTEM_DISALLOWED_CHARS.length) { "_${(it + 'G'.toInt()).toChar()}" }
 }
 
-val Project.minecraft get() = (this as ExtensionAware).extensions.getByName("signing") as ForgeExtension
+val Project.minecraft get() = (this as ExtensionAware).extensions.getByName("minecraft") as ForgeExtension
 
 val Project.forgePlugin get() = project.plugins.getPlugin(ForgePlugin::class.java)
+
+val Project.sourceSets get() = (this as ExtensionAware).extensions.getByName("sourceSets") as SourceSetContainer

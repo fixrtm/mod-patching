@@ -31,20 +31,28 @@ abstract class AbstractDownloadingMod(val project: Project) :
 
     abstract val cacheBaseDir: File
     abstract val cacheBaseName: String
+    abstract val modGlobalIdentifier: String
     abstract fun configureDownloadingTask(dest: File): Task
+
+    fun getJarPath(classifier: String) = cacheBaseDir.resolve("$cacheBaseName-$classifier.jar")
+    fun getMcpJarPath(classifier: String) = cacheBaseDir
+        .resolve("$cacheBaseName-$REPLACE_MCP_CHANNEL-$REPLACE_MCP_VERSION-$classifier.jar")
+        .let { project.provider(project.forgePlugin.delayedFile(it.toString())) }
+
+    fun getTaskName(verb: String) = toLowerCamelCase("$verb mod $name")
+
+    val obfJarPath by lazy { getJarPath("raw") }
+    val deobfJarPathProvider by lazy { getMcpJarPath("deobf") }
+    val finalJarProvider by lazy { project.provider { if (deobf) deobfJarPathProvider else obfJarPath } }
+
+    val downloadTaskName by lazy { getTaskName("download") }
+    val deobfTaskName by lazy { getTaskName("deobfuscate") }
 
     open fun onAdd() {
         val forgePlugin = project.forgePlugin
 
-        val cacheBase = cacheBaseDir
-        val baseName = cacheBaseName
-        val obfJarPath = cacheBase.resolve("$baseName-raw.jar")
-        val deobfJarPathProvider = cacheBase.resolve("$baseName-$REPLACE_MCP_CHANNEL-$REPLACE_MCP_VERSION-deobf.jar")
-            .let { project.provider(forgePlugin.delayedFile(it.toString())) }
-        val finalJarProvider = project.provider { if (deobf) deobfJarPathProvider else obfJarPath }
-
         val downloadTask = configureDownloadingTask(obfJarPath)
-        val deobfTask = project.tasks.create(toLowerCamelCase("deobfuscate mod $name"), DeobfuscateJar::class) {
+        val deobfTask = project.tasks.create(deobfTaskName, DeobfuscateJar::class) {
             setSrg(forgePlugin.delayedFile(SRG_NOTCH_TO_MCP))
             setExceptorJson(forgePlugin.delayedFile(MCP_DATA_EXC_JSON))
             setExceptorCfg(forgePlugin.delayedFile(EXC_MCP))
@@ -55,7 +63,7 @@ abstract class AbstractDownloadingMod(val project: Project) :
             setOutJar(deobfJarPathProvider)
 
             onlyIf { deobf }
-            dependsOn(downloadTask,
+            dependsOn(downloadTaskName,
                 TASK_GENERATE_SRGS,
                 UserConstants.TASK_EXTRACT_DEP_ATS,
                 UserConstants.TASK_DD_COMPILE,
