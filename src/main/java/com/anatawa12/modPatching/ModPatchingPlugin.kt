@@ -1,9 +1,7 @@
 package com.anatawa12.modPatching
 
-import com.anatawa12.modPatching.internal.AbstractDownloadingMod
-import com.anatawa12.modPatching.internal.Constants
+import com.anatawa12.modPatching.internal.*
 import com.anatawa12.modPatching.internal.Constants.COPY_MODS_INTO_MODS_DIR
-import com.anatawa12.modPatching.internal.ModsExtension
 import net.minecraftforge.gradle.user.patcherUser.forge.ForgePlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -16,6 +14,9 @@ open class ModPatchingPlugin : Plugin<Project> {
         project.extensions.add(ModsContainer::class.java, "mods", mods)
         mods.all { (this as? AbstractDownloadingMod)?.onAdd() }
 
+        val patches = PatchingExtension(project)
+        project.extensions.add(ModPatchContainer::class.java, "patching", patches)
+        patches.all { (this as? ModPatchImpl)?.onAdd() }
 
         val copyModsIntoModsDir = project.tasks.create(COPY_MODS_INTO_MODS_DIR)
         project.tasks.findByName("runClient")?.dependsOn(copyModsIntoModsDir)
