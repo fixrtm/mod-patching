@@ -35,7 +35,7 @@ apply plugin: "com.anatawa12.mod-patching"
 ```kotlin
 mods {
    curse {
-      id = "id"
+      id = "id" // slag of mod. e.g. "cofh-core"
       version = "version"
       deobf = true // by default
       addToMods = true // by default if not patching
