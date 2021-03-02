@@ -21,6 +21,7 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.11.0")
     kapt("com.squareup.moshi:moshi-kotlin-codegen:1.11.0")
     implementation("com.anatawa12.forge:ForgeGradle:2.3-1.0.2")
+    implementation("io.sigpipe:jbsdiff:1.0")
 }
 
 tasks.compileKotlin.get().kotlinOptions.freeCompilerArgs = listOf("-XXLanguage:+TrailingCommas")

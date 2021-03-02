@@ -30,7 +30,7 @@ abstract class AbstractDownloadingMod(val project: Project) :
     internal val configurationAddToDefault: String = "compileOnly"
     override var configurationAddTo: String? by Delegates.withDefault(::configurationAddToDefault)
 
-    val buildDir: File get() = Util.getBuildPath(project, name)
+    val buildDir: File get() = Util.getBuildPath(project, "mods", name)
     abstract val cacheBaseDir: File
     abstract val cacheBaseName: String
     abstract val modGlobalIdentifier: String

@@ -1,5 +1,6 @@
 package com.anatawa12.modPatching.internal
 
+import com.anatawa12.modPatching.GenerateBsdiffPatch
 import com.anatawa12.modPatching.ModPatch
 import com.anatawa12.modPatching.OnRepoPatchSource
 import com.anatawa12.modPatching.OnVCSPatchSource
@@ -11,16 +12,22 @@ import com.anatawa12.modPatching.internal.CommonConstants.PATCHING_DIR_NAME
 import com.anatawa12.modPatching.internal.CommonConstants.PATCH_DIR_PATH_CONFIG_FILE_NAME
 import com.anatawa12.modPatching.internal.CommonConstants.SOURCE_DIR_PATH_CONFIG_FILE_NAME
 import com.anatawa12.modPatching.internal.CommonConstants.SOURCE_JAR_PATH_CONFIG_FILE_NAME
+import com.anatawa12.modPatching.internal.Constants.COPY_MODIFIED_CLASSES
 import com.anatawa12.modPatching.internal.Constants.DECOMPILE_MODS
+import com.anatawa12.modPatching.internal.Constants.GENERATE_BSDIFF_PATCH
 import com.anatawa12.modPatching.internal.Constants.GENERATE_UNMODIFIEDS
+import com.anatawa12.modPatching.internal.Constants.REPROCESS_RESOURCES
 import net.minecraftforge.gradle.common.Constants
 import net.minecraftforge.gradle.tasks.fernflower.ApplyFernFlowerTask
 import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.file.CopySpec
+import org.gradle.api.file.FileTree
+import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.*
 import java.io.File
+import java.util.zip.ZipFile
 
 class ModPatchImpl(
     override val mod: AbstractDownloadingMod,
@@ -63,11 +70,16 @@ class ModPatchImpl(
         }
         project.tasks.getByName(DECOMPILE_MODS).dependsOn(decompileTask)
 
-        if (onRepo == OnRepoPatchSource.MODIFIED) {
-            val excludeClasses by lazy {
-                val lines = modDir.resolve(MODIFIED_CLASSES_CONFIG_FILE_NAME).readText().lines()
-                lines.map { it.unescapeStringForFile().replace('.', '/') }
+        val excludeClasses = project.provider {
+            val lines = modDir.resolve(MODIFIED_CLASSES_CONFIG_FILE_NAME).readText().lines()
+            lines.map { it.unescapeStringForFile().replace('.', '/') }
+        }
+        fun isModifiedClass(fileName: String): Boolean {
+            return excludeClasses.get().any { classFile ->
+                classFile == fileName.removeSuffix(".class") || fileName.startsWith("$classFile$")
             }
+        }
+        if (onRepo == OnRepoPatchSource.MODIFIED) {
             val generateUnmodifiedsJarTask = project.tasks.create(generateUnmodifiedsJarTaskName, Zip::class) {
                 dependsOn(mod.deobfTaskName, mod.downloadTaskName)
                 from(project.zipTree(mod.finalJarProvider))
@@ -79,14 +91,32 @@ class ModPatchImpl(
                 unmodifiedsJarPath = archiveFile.get().asFile
                 exclude { elem ->
                     val relative = elem.relativePath.pathString
-                    println("relative:$relative")
-                    !relative.endsWith(".class") || excludeClasses.any { classFile ->
+                    !relative.endsWith(".class") || excludeClasses.get().any { classFile ->
                         classFile == relative.removeSuffix(".class") || relative.startsWith("$classFile$")
                     }
                 }
             }
             project.tasks.getByName(GENERATE_UNMODIFIEDS).dependsOn(generateUnmodifiedsJarTask)
             project.dependencies.add("implementation", project.files(unmodifiedsJarPath))
+        }
+
+        val jar = project.tasks.getByName("jar", Jar::class)
+        project.tasks.getByName(COPY_MODIFIED_CLASSES, Copy::class).apply {
+            from(project.provider { project.zipTree(jar.archiveFile) }) {
+                include { it.path.endsWith(".class") && isModifiedClass(it.path) }
+            }
+        }
+        project.tasks.getByName(GENERATE_BSDIFF_PATCH, GenerateBsdiffPatch::class).apply {
+            val oldFilesProvider: ChainingProvider<FileTree> by this.extra
+            oldFilesProvider.then {
+                it + project.zipTree(mod.obfJarPath).matching {
+                    include { it.path.endsWith(".class") && isModifiedClass(it.path) }
+                }
+            }
+        }
+        project.tasks.getByName(REPROCESS_RESOURCES, Copy::class).apply {
+            val inJarSpec: CopySpec by this.extra
+            inJarSpec.exclude { elem -> ZipFile(mod.obfJarPath).use { it.getEntry(elem.path) != null } }
         }
 
         project.afterEvaluate {

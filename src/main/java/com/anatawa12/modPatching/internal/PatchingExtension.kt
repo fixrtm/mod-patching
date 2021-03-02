@@ -11,6 +11,9 @@ class PatchingExtension(private val project: Project) :
     ModPatchContainer,
     NamedDomainObjectCollection<ModPatch> by project.container(ModPatch::class.java)
 {
+    override var bsdiffPrefix: String = ""
+    override var sourceNameSuffix: String = ""
+
     override fun patch(mod: DownloadingMod, block: Action<ModPatch>): ModPatch {
         require(mod is AbstractDownloadingMod) { "unsupported DownloadingMod: $mod" }
         return ModPatchImpl(mod)
