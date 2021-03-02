@@ -121,6 +121,12 @@ class ModPatchImpl(
             val inJarSpec: CopySpec by this.extra
             inJarSpec.exclude { elem -> ZipFile(mod.obfJarPath).use { it.getEntry(elem.path) != null } }
         }
+        project.tasks.getByName("processResources", Copy::class).apply {
+            dependsOn(mod.downloadTaskName)
+            from(project.zipTree(mod.obfJarPath)) {
+                exclude("**/*.class")
+            }
+        }
 
         project.afterEvaluate {
             modDir.mkdirs()
