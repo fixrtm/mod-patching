@@ -5,14 +5,14 @@ Features (checked means implemented)
 
 - [x] downloading mods from curse forge
 - [x] obfuscating mods
-- [ ] decompiling mods
-- [ ] making binary patch
-- [ ] making source patch
+- [x] decompiling mods
+- [x] making binary patch
+- [x] making source patch
     - [ ] for workaround of decompiler bugs
-    - [ ] for commits
+    - [x] for commits
 - [ ] making git hooks
-    - [ ] for commit only modified files
-    - [ ] for commit only patches
+    - [ ] for commit patches
+- [ ] making merge controller
 
 ```groovy
 buildscript {
@@ -57,7 +57,7 @@ patching {
       sourceTreeName = "" // by default, id.
       onRepo = OnRepoPatchSource.MODIFIED // default
 //      onRepo = OnRepoPatchSource.ALL
-      onVCS = OnVCSPatchSource.MODIFIED
+//      onVCS = OnVCSPatchSource.MODIFIED
       onVCS = OnVCSPatchSource.PATCHES // default
 //      onVCS = OnVCSPatchSource.ALL_FILES
    }
@@ -67,8 +67,9 @@ patching {
 default source format
 ```
 src/main
- +- <sourceTreeName>-pre-patches 
- |    // patch source of <id> for workaround of decompiler bugs
+// not yet implemented
+// +- <sourceTreeName>-pre-patches 
+// |    // patch source of <id> for workaround of decompiler bugs
  +- <sourceTreeName>
  |    // java source of <id>
  |    // if onRepo is PATCHES, gitignored.
