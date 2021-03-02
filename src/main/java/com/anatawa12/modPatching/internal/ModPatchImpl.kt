@@ -1,9 +1,6 @@
 package com.anatawa12.modPatching.internal
 
-import com.anatawa12.modPatching.GenerateBsdiffPatch
-import com.anatawa12.modPatching.ModPatch
-import com.anatawa12.modPatching.OnRepoPatchSource
-import com.anatawa12.modPatching.OnVCSPatchSource
+import com.anatawa12.modPatching.*
 import com.anatawa12.modPatching.internal.CommonConstants.MODIFIED_CLASSES_CONFIG_FILE_NAME
 import com.anatawa12.modPatching.internal.CommonConstants.MOD_DIR_EXTENSION
 import com.anatawa12.modPatching.internal.CommonConstants.MOD_ON_REPO_CONFIG_FILE_NAME
@@ -12,6 +9,7 @@ import com.anatawa12.modPatching.internal.CommonConstants.PATCHING_DIR_NAME
 import com.anatawa12.modPatching.internal.CommonConstants.PATCH_DIR_PATH_CONFIG_FILE_NAME
 import com.anatawa12.modPatching.internal.CommonConstants.SOURCE_DIR_PATH_CONFIG_FILE_NAME
 import com.anatawa12.modPatching.internal.CommonConstants.SOURCE_JAR_PATH_CONFIG_FILE_NAME
+import com.anatawa12.modPatching.internal.Constants.CHECK_SIGNATURE
 import com.anatawa12.modPatching.internal.Constants.COPY_MODIFIED_CLASSES
 import com.anatawa12.modPatching.internal.Constants.DECOMPILE_MODS
 import com.anatawa12.modPatching.internal.Constants.GENERATE_BSDIFF_PATCH
@@ -106,6 +104,9 @@ class ModPatchImpl(
             from(project.provider { project.zipTree(jar.archiveFile) }) {
                 include { it.path.endsWith(".class") && isModifiedClass(it.path) }
             }
+        }
+        project.tasks.getByName(CHECK_SIGNATURE, CheckSignatureModification::class).apply {
+            baseClasses.add(project.provider { project.zipTree(mod.obfJarPath) })
         }
         project.tasks.getByName(GENERATE_BSDIFF_PATCH, GenerateBsdiffPatch::class).apply {
             dependsOn(mod.downloadTaskName)

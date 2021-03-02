@@ -4,6 +4,7 @@ import com.anatawa12.modPatching.internal.*
 import com.anatawa12.modPatching.internal.CommonConstants.MODIFIED_CLASSES_CONFIG_FILE_NAME
 import com.anatawa12.modPatching.internal.CommonConstants.PATCHING_DIR_NAME
 import com.anatawa12.modPatching.internal.CommonConstants.SCRIPTING_DIR_NAME
+import com.anatawa12.modPatching.internal.Constants.CHECK_SIGNATURE
 import com.anatawa12.modPatching.internal.Constants.COPY_MODIFIED_CLASSES
 import com.anatawa12.modPatching.internal.Constants.COPY_MODS_INTO_MODS_DIR
 import com.anatawa12.modPatching.internal.Constants.DECOMPILE_MODS
@@ -108,6 +109,10 @@ open class ModPatchingPlugin : Plugin<Project> {
             dependsOn("reobfJar")
             into { Util.getBuildPath(project, "modified") }
         }
+        val checkSignature = project.tasks.create(CHECK_SIGNATURE, CheckSignatureModification::class) {
+            dependsOn(copyModifiedClasses)
+            modifiedClasses.add(project.fileTree(Util.getBuildPath(project, "modified")))
+        }
         val renameSourceName = project.tasks.create(RENAME_SOURCE_NAME, RenameSourceName::class) {
             dependsOn(copyModifiedClasses)
             classesDir.set(Util.getBuildPath(project, "modified"))
@@ -144,6 +149,7 @@ open class ModPatchingPlugin : Plugin<Project> {
                 }
             }
         }
+        project.tasks.getByPath("check").dependsOn(checkSignature)
         project.tasks.getByPath("assemble").dependsOn(copyJar)
     }
 }
