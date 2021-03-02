@@ -102,11 +102,13 @@ class ModPatchImpl(
 
         val jar = project.tasks.getByName("jar", Jar::class)
         project.tasks.getByName(COPY_MODIFIED_CLASSES, Copy::class).apply {
+            dependsOn(jar)
             from(project.provider { project.zipTree(jar.archiveFile) }) {
                 include { it.path.endsWith(".class") && isModifiedClass(it.path) }
             }
         }
         project.tasks.getByName(GENERATE_BSDIFF_PATCH, GenerateBsdiffPatch::class).apply {
+            dependsOn(mod.downloadTaskName)
             val oldFilesProvider: ChainingProvider<FileTree> by this.extra
             oldFilesProvider.then {
                 it + project.zipTree(mod.obfJarPath).matching {
@@ -115,6 +117,7 @@ class ModPatchImpl(
             }
         }
         project.tasks.getByName(REPROCESS_RESOURCES, Copy::class).apply {
+            dependsOn(mod.downloadTaskName)
             val inJarSpec: CopySpec by this.extra
             inJarSpec.exclude { elem -> ZipFile(mod.obfJarPath).use { it.getEntry(elem.path) != null } }
         }
