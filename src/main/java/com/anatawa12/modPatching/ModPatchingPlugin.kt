@@ -1,9 +1,6 @@
 package com.anatawa12.modPatching
 
 import com.anatawa12.modPatching.internal.*
-import com.anatawa12.modPatching.internal.CommonConstants.MODIFIED_CLASSES_CONFIG_FILE_NAME
-import com.anatawa12.modPatching.internal.CommonConstants.PATCHING_DIR_NAME
-import com.anatawa12.modPatching.internal.CommonConstants.SCRIPTING_DIR_NAME
 import com.anatawa12.modPatching.internal.Constants.CHECK_SIGNATURE
 import com.anatawa12.modPatching.internal.Constants.COPY_MODIFIED_CLASSES
 import com.anatawa12.modPatching.internal.Constants.COPY_MODS_INTO_MODS_DIR
@@ -14,6 +11,7 @@ import com.anatawa12.modPatching.internal.Constants.GENERATE_UNMODIFIEDS
 import com.anatawa12.modPatching.internal.Constants.REGENERATE_JAR
 import com.anatawa12.modPatching.internal.Constants.RENAME_SOURCE_NAME
 import com.anatawa12.modPatching.internal.Constants.REPROCESS_RESOURCES
+import com.anatawa12.modPatching.internal.patchingDir.PatchingDir
 import com.cloudbees.diff.Diff
 import net.minecraftforge.gradle.user.patcherUser.forge.ForgePlugin
 import net.minecraftforge.gradle.util.patching.ContextualPatch
@@ -22,12 +20,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.CopySpec
-import org.gradle.api.file.FileTree
-import org.gradle.api.invocation.Gradle
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.application.CreateStartScripts
-import org.gradle.api.tasks.bundling.Zip
-import org.gradle.internal.classpath.Instrumented
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.*
 import org.gradle.util.JarUtil
@@ -35,6 +28,8 @@ import org.gradle.util.JarUtil
 @Suppress("unused")
 open class ModPatchingPlugin : Plugin<Project> {
     override fun apply(project: Project) {
+        val patchingDir = PatchingDir(project.projectDir)
+
         project.plugins.apply(ForgePlugin::class.java)
         val mods = ModsExtension(project)
         project.extensions.add(ModsContainer::class.java, "mods", mods)
@@ -42,7 +37,7 @@ open class ModPatchingPlugin : Plugin<Project> {
 
         val patches = PatchingExtension(project)
         project.extensions.add(ModPatchContainer::class.java, "patching", patches)
-        patches.all { (this as? ModPatchImpl)?.onAdd() }
+        patches.all { (this as? ModPatchImpl)?.onAdd(patchingDir) }
 
         val downloadMods = project.tasks.create(DOWNLOAD_MODS)
         val decompileMods = project.tasks.create(DECOMPILE_MODS)
@@ -92,9 +87,6 @@ open class ModPatchingPlugin : Plugin<Project> {
         generateBuildProcess(project, patches)
 
         project.afterEvaluate {
-            val patchingModsDir = project.projectDir.resolve(PATCHING_DIR_NAME)
-            patchingModsDir.mkdirs()
-            patchingModsDir.resolve(".gitkeep").writeText("")
             val logger = project.logger
             if (!projectDir.resolve(".gitignore").readTextOr("").lineSequence().any { it == "pm.*" || it == "/pm.*" }) {
                 logger.warn("pm.* is not git ignored! generated patching mod utility should be ignored because " +

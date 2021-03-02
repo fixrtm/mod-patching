@@ -3,65 +3,35 @@
 package com.anatawa12.modPatching.internalTools
 
 import com.anatawa12.modPatching.OnVCSPatchSource
-import com.anatawa12.modPatching.internal.CommonConstants.MODIFIED_CLASSES_CONFIG_FILE_NAME
-import com.anatawa12.modPatching.internal.CommonConstants.MOD_DIR_EXTENSION
-import com.anatawa12.modPatching.internal.CommonConstants.MOD_ON_REPO_CONFIG_FILE_NAME
-import com.anatawa12.modPatching.internal.CommonConstants.MOD_ON_VCS_CONFIG_FILE_NAME
-import com.anatawa12.modPatching.internal.CommonConstants.PATCHING_DIR_NAME
-import com.anatawa12.modPatching.internal.CommonConstants.PATCH_DIR_PATH_CONFIG_FILE_NAME
 import com.anatawa12.modPatching.internal.CommonConstants.PATCH_FILE_EXTENSION
-import com.anatawa12.modPatching.internal.CommonConstants.SOURCE_DIR_PATH_CONFIG_FILE_NAME
-import com.anatawa12.modPatching.internal.CommonConstants.SOURCE_JAR_PATH_CONFIG_FILE_NAME
-import com.anatawa12.modPatching.internal.escapeStringForFile
-import com.anatawa12.modPatching.internal.unescapeStringForFile
+import com.anatawa12.modPatching.internal.patchingDir.PatchingDir
 import com.cloudbees.diff.Diff
-import org.gradle.internal.impldep.org.eclipse.jgit.api.Git
 import java.io.File
 import java.io.StringReader
-import java.util.*
 import java.util.zip.ZipFile
 
 fun main(args: Array<String>) {
-    data class PatchesModInfo(
-        val rawSrc: File,
-        val src: File,
-        val patches: File,
-        val modifieds: Set<String>,
-    )
+    val patchingDir = PatchingDir.on(File("."))
+    val mods = patchingDir.patchingMods.filter { it.onVcs == OnVCSPatchSource.PATCHES }
 
-    val patchingDir = File("./$PATCHING_DIR_NAME")
-    val mods = patchingDir.listFiles()
-        ?.asSequence().let { it ?: emptySequence() }
-        .filter { it.name.endsWith(".$MOD_DIR_EXTENSION") }
-        .filter { it.resolve(MOD_ON_VCS_CONFIG_FILE_NAME).readText().trim() == OnVCSPatchSource.PATCHES.name }
-        .map { modDir ->
-            PatchesModInfo(
-                File(modDir.resolve(SOURCE_JAR_PATH_CONFIG_FILE_NAME)
-                    .readText().lineSequence().first().unescapeStringForFile()),
-                File(modDir.resolve(SOURCE_DIR_PATH_CONFIG_FILE_NAME)
-                    .readText().lineSequence().first().unescapeStringForFile()),
-                File(modDir.resolve(PATCH_DIR_PATH_CONFIG_FILE_NAME)
-                    .readText().lineSequence().first().unescapeStringForFile()),
-                modDir.resolve(MODIFIED_CLASSES_CONFIG_FILE_NAME)
-                    .readText().lineSequence().map { it.unescapeStringForFile() }
-                    .filterNot { it.isBlank() }.toSet(),
-            )
-        }
+    for (mod in mods) {
+        val raw = mod.sourceJarPath
+        val patches = mod.patchPath
+        val src = mod.sourcePath
 
-    for ((raw, src, patches, modifieds) in mods) {
         val rawJar = ZipFile(raw)
         val sources = src.walkTopDown()
             .filter { it.isFile }
             .map { it.toRelativeString(src) }
             .toSet()
-        val modifiedsCopy = modifieds.toMutableSet()
-        for (source in sources) {
-            val sourceClass = source.removeSuffix(".java").replace('/', '.')
-            if (sourceClass !in modifiedsCopy) error("$sourceClass is not defined modified class")
-            modifiedsCopy.remove(sourceClass)
-        }
-        if (modifiedsCopy.isNotEmpty()) error("source file for some class not found: \n" +
-                modifiedsCopy.joinToString("\n"))
+
+        mod.modifiedClasses.checkSame(
+            sources,
+            { it.removeSuffix(".java.$PATCH_FILE_EXTENSION").replace('/', '.') },
+            "those classes are not defined modified class",
+            "source for some class not found",
+        )
+
         for (source in sources) {
             if (rawJar.getEntry(source) == null)
                 error("$source not found in original source")
@@ -86,4 +56,5 @@ fun main(args: Array<String>) {
 
         GitWrapper.add(patches)
     }
+    patchingDir.flush()
 }

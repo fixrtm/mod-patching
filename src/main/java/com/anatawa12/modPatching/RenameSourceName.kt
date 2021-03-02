@@ -33,13 +33,4 @@ open class RenameSourceName : DefaultTask() {
             super.visitSource(source?.plus(suffix.get()), debug)
         }
     }
-
-    private fun getAllFiles(fileTree: FileTree): Map<String, File> {
-        val files = mutableMapOf<String, File>()
-        fileTree.visit {
-            if (isDirectory) return@visit
-            files[path] = file
-        }
-        return files
-    }
 }
