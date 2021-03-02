@@ -1,5 +1,6 @@
 package com.anatawa12.modPatching
 
+import com.anatawa12.modPatching.internal.flatten
 import io.sigpipe.jbsdiff.Diff
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileTree
@@ -7,15 +8,16 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import java.io.File
 import java.security.MessageDigest
 
 open class GenerateBsdiffPatch : DefaultTask() {
     @InputFiles
-    var oldFiles = project.objects.property(FileTree::class).convention(project.files().asFileTree)
+    var oldFiles = project.objects.listProperty(FileTree::class).convention(emptyList())
     @InputFiles
-    var newFiles = project.objects.property(FileTree::class).convention(project.files().asFileTree)
+    var newFiles = project.objects.listProperty(FileTree::class).convention(emptyList())
     @OutputDirectory
     val outTo = project.objects.property(File::class)
     @Input
@@ -23,8 +25,8 @@ open class GenerateBsdiffPatch : DefaultTask() {
 
     @TaskAction
     fun run() {
-        val oldFiles = getAllFiles(oldFiles.get())
-        val newFiles = getAllFiles(newFiles.get())
+        val oldFiles = getAllFiles(oldFiles.get().flatten(project))
+        val newFiles = getAllFiles(newFiles.get().flatten(project))
         val outTo = outTo.get()
         val patchPrefix = patchPrefix.get()
 

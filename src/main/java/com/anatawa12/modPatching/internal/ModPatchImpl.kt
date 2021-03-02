@@ -109,12 +109,11 @@ class ModPatchImpl(
         }
         project.tasks.getByName(GENERATE_BSDIFF_PATCH, GenerateBsdiffPatch::class).apply {
             dependsOn(mod.downloadTaskName)
-            val oldFilesProvider: ChainingProvider<FileTree> by this.extra
-            oldFilesProvider.then {
-                it + project.zipTree(mod.obfJarPath).matching {
+            oldFiles.add(project.provider {
+                project.zipTree(mod.obfJarPath).matching {
                     include { it.path.endsWith(".class") && isModifiedClass(it.path) }
                 }
-            }
+            })
         }
         project.tasks.getByName(REPROCESS_RESOURCES, Copy::class).apply {
             dependsOn(mod.downloadTaskName)

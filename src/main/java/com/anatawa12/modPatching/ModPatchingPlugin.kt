@@ -115,10 +115,7 @@ open class ModPatchingPlugin : Plugin<Project> {
         }
         val generateBsdiffPatch = project.tasks.create(GENERATE_BSDIFF_PATCH, GenerateBsdiffPatch::class) {
             dependsOn(renameSourceName)
-            var oldFilesProvider: ChainingProvider<FileTree> by this.extra
-            oldFilesProvider = ChainingProvider(project.files().asFileTree)
-            oldFiles.set(project.provider(oldFilesProvider))
-            newFiles.set(project.fileTree(Util.getBuildPath(project, "modified")))
+            newFiles.add(project.fileTree(Util.getBuildPath(project, "modified")))
             patchPrefix.set(project.provider { patches.bsdiffPrefix })
             outTo.set(Util.getBuildPath(project, "patches"))
         }
