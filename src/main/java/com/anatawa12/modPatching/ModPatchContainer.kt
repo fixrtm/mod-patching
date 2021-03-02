@@ -11,4 +11,5 @@ interface ModPatchContainer : NamedDomainObjectCollection<ModPatch> {
 
     fun patch(mod: DownloadingMod, block: Action<ModPatch>): ModPatch
     fun patch(mod: DownloadingMod, block: Closure<*>): ModPatch = patch(mod, ConfigureUtil.configureUsing(block))
+    fun patch(mod: DownloadingMod): ModPatch = patch(mod) {}
 }
