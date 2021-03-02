@@ -1,6 +1,7 @@
 package com.anatawa12.modPatching.internal
 
 import java.io.File
+import java.io.FileNotFoundException
 
 fun String.unescapeStringForFile(): String {
     val baskSlashIndex = indexOf('\\')
@@ -57,3 +58,25 @@ fun String.escapeStringForFile(): String {
 }
 
 private val escapeNeededChars = "\\\r\n".toCharArray()
+
+fun File.readTextOr(ifNotFound: String = ""): String = try {
+    readText()
+} catch (e: FileNotFoundException) {
+    ifNotFound
+}
+
+inline fun <T> List<T>.indexOfFirst(begin: Int, predicate: (T) -> Boolean): Int {
+    if (size <= begin) return -1
+    var index = begin
+    val iter = iterator()
+    repeat(begin) {
+        if (!iter.hasNext()) return -1
+        iter.next()
+    }
+    for (item in iter) {
+        if (predicate(item))
+            return index
+        index++
+    }
+    return -1
+}

@@ -2,6 +2,7 @@ package com.anatawa12.modPatching
 
 import com.anatawa12.modPatching.internal.FirstAndRestSequence
 import com.anatawa12.modPatching.internal.curse.CFWidgetApi
+import com.anatawa12.modPatching.internal.curse.ForgeSvcApi
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.buffer
@@ -51,10 +52,12 @@ open class DownloadCurseModJar : DefaultTask() {
 
         println("file name is: ${file.displayName}, id: ${file.id}")
 
+        val downloadUrl = ForgeSvcApi.getFileInfo(client, project.id, file.id).downloadUrl
+
         val response = client
             .newCall(
                 Request.Builder()
-                    .url(file.url)
+                    .url(downloadUrl)
                     .get()
                     .build())
             .execute()

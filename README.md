@@ -56,10 +56,10 @@ patching {
    patch(rtm) {
       sourceTreeName = "" // by default, id.
       onRepo = OnRepoPatchSource.MODIFIED // default
-      onRepo = OnRepoPatchSource.ALL
+//      onRepo = OnRepoPatchSource.ALL
       onVCS = OnVCSPatchSource.MODIFIED
       onVCS = OnVCSPatchSource.PATCHES // default
-      onVCS = OnVCSPatchSource.ALL_FILES
+//      onVCS = OnVCSPatchSource.ALL_FILES
    }
 }
 ```

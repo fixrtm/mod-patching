@@ -18,6 +18,15 @@ object Util {
         return cache
     }
 
+    fun getBuildPath(project: Project, vararg pathElements: String): File {
+        var cache = project.buildDir
+        cache = cache.resolve("patching-mod")
+        for (pathElement in pathElements) {
+            cache = cache.resolve(escapePathElement(pathElement))
+        }
+        return cache
+    }
+
     fun escapePathElement(pathElement: String): String {
         for ((i, c) in pathElement.withIndex()) {
             if (c < 128.toChar()) continue
