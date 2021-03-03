@@ -25,8 +25,8 @@ fun main(args: Array<String>) {
             .toSet()
 
         mod.modifiedClasses.checkSame(
-            patches,
-            { it.removeSuffix(".java.$PATCH_FILE_EXTENSION").replace('/', '.') },
+            patches.asSequence()
+                .map { it.removeSuffix(".java.$PATCH_FILE_EXTENSION").replace('/', '.') },
             "those classes are not defined modified class",
             "patch for some class not found",
         )

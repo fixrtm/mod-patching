@@ -3,6 +3,8 @@
 package com.anatawa12.modPatching.internalTools
 
 import com.anatawa12.modPatching.internal.indexOfFirst
+import java.io.File
+import java.io.IOException
 import java.util.*
 
 fun <T> Sequence<T>.chooseOne(
@@ -46,30 +48,48 @@ fun makeJavaFileNameMatcher(matcher: String): (String) -> Boolean {
     }
 }
 
-fun <A, B> Set<A>.checkSame(
-    other: Set<B>,
-    mapper: (B) -> A,
+data class Difference<T>(
+    val added: Set<T>,
+    val deleted: Set<T>,
+    val same: Set<T>,
+) {
+}
+
+/**
+ * @return Pair(added to this, deleted from this)
+ */
+fun <E> Set<E>.diff(
+    other: Sequence<E>,
+): Difference<E> {
+    val both = mutableSetOf<E>()
+    val notExistsOnThis = mutableSetOf<E>()
+    val thisCopy = toMutableSet()
+    for (otherElement in other) {
+        if (!thisCopy.remove(otherElement)) {
+            notExistsOnThis += otherElement
+        } else {
+            both += otherElement
+        }
+    }
+    return Difference(thisCopy, notExistsOnThis, both)
+}
+
+fun <E> Set<E>.checkSame(
+    other: Sequence<E>,
     notExistsOnThisMsg: String,
     notExistsOnOtherMsg: String,
 ) {
-    val notExistsOnThis = mutableSetOf<A>()
-    val aCopy = toMutableSet()
-    for (elementB in other) {
-        val convertedB = mapper(elementB)
-        if (!aCopy.remove(convertedB)) {
-            notExistsOnThis += convertedB
-        }
-    }
-    if (aCopy.isEmpty() && notExistsOnThis.isEmpty()) return
+    val (addToThis, deletedFromThis) = diff(other)
+    if (addToThis.isEmpty() && deletedFromThis.isEmpty()) return
     var error = ""
-    if (aCopy.isNotEmpty()) {
+    if (addToThis.isNotEmpty()) {
         error += "$notExistsOnOtherMsg: \n" +
-                aCopy.joinToString("\n") +
+                addToThis.joinToString("\n") +
                 "\n"
     }
-    if (notExistsOnThis.isNotEmpty()) {
+    if (deletedFromThis.isNotEmpty()) {
         error += "$notExistsOnThisMsg: \n" +
-                notExistsOnThis.joinToString("\n") +
+                deletedFromThis.joinToString("\n") +
                 "\n"
     }
     error(error)
