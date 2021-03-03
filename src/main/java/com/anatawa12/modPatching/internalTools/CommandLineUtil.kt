@@ -94,3 +94,18 @@ fun <E> Set<E>.checkSame(
     }
     error(error)
 }
+
+fun String.cygwinFile(): File {
+    val process = try {
+        ProcessBuilder("cygpath", "-w", this)
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .start()
+    } catch (e: IOException) {
+        // expects 'cygpath' not found
+        return File(this)
+    }
+    process.outputStream.close()
+    process.waitFor()
+    val path = process.inputStream.reader().use { it.readText() }.removeSuffix("\n")
+    return File(path)
+}
