@@ -27,7 +27,7 @@ fun main(args: Array<String>) {
 
         mod.modifiedClasses.checkSame(
             sources.asSequence()
-                .map{ it.removeSuffix(".java.$PATCH_FILE_EXTENSION").replace('/', '.') },
+                .map{ it.removeSuffix(".java").replace('/', '.') },
             "those classes are not defined modified class",
             "source for some class not found",
         )
