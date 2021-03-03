@@ -60,7 +60,8 @@ class ModPatchImpl(
 
         val excludeClasses = project.provider { modInfo.modifiedClasses }
         fun isModifiedClass(fileName: String): Boolean {
-            return excludeClasses.get().any { classFile ->
+            return excludeClasses.get().any {
+                val classFile = it.replace('.', '/')
                 classFile == fileName.removeSuffix(".class") || fileName.startsWith("$classFile$")
             }
         }
@@ -74,12 +75,8 @@ class ModPatchImpl(
                 archiveVersion.set("")
                 archiveExtension.set("jar")
                 unmodifiedsJarPath = archiveFile.get().asFile
-                exclude { elem ->
-                    val relative = elem.relativePath.pathString
-                    !relative.endsWith(".class") || excludeClasses.get().any { classFile ->
-                        classFile == relative.removeSuffix(".class") || relative.startsWith("$classFile$")
-                    }
-                }
+                inputs.property("excludeClasses", excludeClasses)
+                exclude { !it.path.endsWith(".class") || isModifiedClass(it.path) }
             }
             project.tasks.getByName(GENERATE_UNMODIFIEDS).dependsOn(generateUnmodifiedsJarTask)
             project.dependencies.add("implementation", project.files(unmodifiedsJarPath))
@@ -88,6 +85,7 @@ class ModPatchImpl(
         val jar = project.tasks.getByName("jar", Jar::class)
         project.tasks.getByName(COPY_MODIFIED_CLASSES, Copy::class).apply {
             dependsOn(jar)
+            inputs.property("excludeClassesOf${mod.name}", excludeClasses)
             from(project.provider { project.zipTree(jar.archiveFile) }) {
                 include { it.path.endsWith(".class") && isModifiedClass(it.path) }
             }
