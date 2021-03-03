@@ -28,7 +28,7 @@ import org.gradle.util.JarUtil
 @Suppress("unused")
 open class ModPatchingPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val patchingDir = PatchingDir(project.projectDir)
+        val patchingDir = PatchingDir.on(project.projectDir)
 
         project.plugins.apply(ForgePlugin::class.java)
         val mods = ModsExtension(project)

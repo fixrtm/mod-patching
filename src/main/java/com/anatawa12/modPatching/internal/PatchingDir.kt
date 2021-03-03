@@ -9,7 +9,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import kotlin.reflect.KProperty
 
-class PatchingDir(val dir: File) {
+class PatchingDir private constructor (val dir: File) {
     private val _patchingMods = mutableMapOf<String, PatchingMod>()
     internal val changed = mutableSetOf<PatchingMod>()
 
@@ -75,6 +75,7 @@ class PatchingMod(val dir: File, val parent: PatchingDir) {
     }
 
     internal fun flush() {
+        dir.mkdirs()
         dir.resolve(".gitignore").writeText("""
                 .gitignore
                 ${PatchingModProp.OnRepo.onFile}
