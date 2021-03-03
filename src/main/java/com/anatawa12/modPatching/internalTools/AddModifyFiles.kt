@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
                 .map { mod to it }
         }
         .chooseOne(
-            5, "classes", sc,
+            100, "classes", sc,
             { it.second.name },
             { "no class matches '$matcher' not found" },
             { "more than 5 classes matches '$matcher' found" },
