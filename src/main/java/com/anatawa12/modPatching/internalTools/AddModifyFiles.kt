@@ -20,7 +20,7 @@ fun main(args: Array<String>) {
     val (mod, entry) = patchingDir.patchingMods.asSequence()
         .filter { it.onRepo == OnRepoPatchSource.MODIFIED }
         .flatMap { mod ->
-            ZipFile(mod.sourceJarPath).use { it.entries() }
+            ZipFile(mod.sourceJarPath).use { it.entries().toList() }
                 .asSequence()
                 .filter { classFileNameMatcher(it.name) }
                 .map { mod to it }
