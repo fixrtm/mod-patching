@@ -94,7 +94,7 @@ class PatchingMod(val dir: File, val parent: PatchingDir) {
     }
 }
 
-private sealed class PatchingModProp<T>(val type: Class<T>, val onFile: String) {
+internal sealed class PatchingModProp<T>(val type: Class<T>, val onFile: String) {
     object OnRepo : PatchingModProp<OnRepoPatchSource>(classOf(), "on-repo.txt") {
         override fun parseFile(lines: List<String>) = OnRepoPatchSource.valueOf(lines.first().trim())
         override fun writeFile(value: OnRepoPatchSource) = listOf(value.name)
