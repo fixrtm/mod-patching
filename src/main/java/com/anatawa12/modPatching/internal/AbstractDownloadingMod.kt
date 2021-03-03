@@ -55,7 +55,7 @@ abstract class AbstractDownloadingMod(val project: Project) :
 
         val downloadTask = configureDownloadingTask(obfJarPath)
         val deobfTask = project.tasks.create(deobfTaskName, DeobfuscateJar::class) {
-            setSrg(forgePlugin.delayedFile(SRG_NOTCH_TO_MCP))
+            setSrg(forgePlugin.delayedFile(SRG_SRG_TO_MCP))
             setExceptorJson(forgePlugin.delayedFile(MCP_DATA_EXC_JSON))
             setExceptorCfg(forgePlugin.delayedFile(EXC_MCP))
             setFieldCsv(forgePlugin.delayedFile(CSV_FIELD))
