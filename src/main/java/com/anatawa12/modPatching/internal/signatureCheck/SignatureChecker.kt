@@ -1,5 +1,6 @@
 package com.anatawa12.modPatching.internal.signatureCheck
 
+import com.anatawa12.modPatching.internal.zipEitherByKey
 import org.gradle.api.file.FileTree
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.*
@@ -70,17 +71,6 @@ class SignatureChecker {
     private fun readClass(byteArray: ByteArray): ClassNode = ClassNode().apply {
         ClassReader(byteArray)
             .accept(this, ClassReader.SKIP_CODE + ClassReader.SKIP_DEBUG + ClassReader.SKIP_FRAMES)
-    }
-
-    private fun <K, V> Map<K, V>.zipEitherByKey(other: Map<K, V>): Map<K, Pair<V?, V?>> {
-        val result = mutableMapOf<K, Pair<V?, V?>>()
-        for ((k, v) in this) {
-            result[k] = v to other[k]
-        }
-        for (k in (other.keys - keys)) {
-            result[k] = null to other[k]
-        }
-        return result
     }
 
     private fun addDiff(diff: Difference) {

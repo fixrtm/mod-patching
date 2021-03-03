@@ -80,3 +80,14 @@ inline fun <T> List<T>.indexOfFirst(begin: Int, predicate: (T) -> Boolean): Int 
     }
     return -1
 }
+
+fun <K, V> Map<K, V>.zipEitherByKey(other: Map<K, V>): Map<K, Pair<V?, V?>> {
+    val result = mutableMapOf<K, Pair<V?, V?>>()
+    for ((k, v) in this) {
+        result[k] = v to other[k]
+    }
+    for (k in (other.keys - keys)) {
+        result[k] = null to other[k]
+    }
+    return result
+}
