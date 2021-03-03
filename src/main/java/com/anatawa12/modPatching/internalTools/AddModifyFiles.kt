@@ -36,8 +36,7 @@ fun main(args: Array<String>) {
     if (javaFilePath.exists()) return println("${entry.name} already exists")
 
     javaFilePath.parentFile.mkdirs()
-    ZipFile(mod.sourceJarPath).use { it.getInputStream(entry) }
-        .copyTo(javaFilePath.outputStream())
+    ZipFile(mod.sourceJarPath).use { it.getInputStream(entry).copyTo(javaFilePath.outputStream()) }
     mod.modifiedClasses += entry.name.removeSuffix(".java").replace('/', '.')
     if (mod.onVcs == OnVCSPatchSource.PATCHES) {
         val patchFile = mod.patchPath.resolve("${entry.name}.${PATCH_FILE_EXTENSION}")
