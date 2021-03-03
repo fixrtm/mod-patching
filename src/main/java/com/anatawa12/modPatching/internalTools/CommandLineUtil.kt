@@ -1,5 +1,3 @@
-@file:JvmName("CreateDiff")
-
 package com.anatawa12.modPatching.internalTools
 
 import com.anatawa12.modPatching.internal.indexOfFirst
