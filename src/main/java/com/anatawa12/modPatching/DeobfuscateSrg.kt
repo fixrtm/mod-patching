@@ -44,13 +44,22 @@ open class DeobfuscateSrg : DefaultTask() {
                         val cr = ClassReader(zis.readBytes())
                         val cw = ClassWriter(0)
                         cr.accept(ClassRemapper(cw, remapper), 0)
-                        zos.putNextEntry(entry)
+                        zos.putNextEntry(ZipEntry(entry.name).apply {
+                            size = 0
+                            crc = 0
+                            compressedSize = -1
+                            time = entry.time
+                            entry.lastAccessTime?.let { lastAccessTime = null }
+                            entry.creationTime?.let { creationTime = null }
+                            extra = entry.extra
+                            comment = entry.comment
+                        })
                         zos.write(cw.toByteArray())
                         zos.closeEntry()
                         zis.closeEntry()
                     } else {
                         // it's not class file: just copy
-                        zos.putNextEntry(entry)
+                        zos.putNextEntry(ZipEntry(entry).apply { compressedSize = -1 })
                         zis.copyTo(zos)
                         zos.closeEntry()
                         zis.closeEntry()
