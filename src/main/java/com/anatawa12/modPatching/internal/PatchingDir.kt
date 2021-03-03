@@ -3,6 +3,7 @@ package com.anatawa12.modPatching.internal.patchingDir
 import com.anatawa12.modPatching.OnRepoPatchSource
 import com.anatawa12.modPatching.OnVCSPatchSource
 import com.anatawa12.modPatching.internal.escapePathStringForFile
+import com.anatawa12.modPatching.internal.escapeStringForFile
 import com.anatawa12.modPatching.internal.unescapeStringForFile
 import java.io.File
 import java.io.FileNotFoundException
@@ -127,7 +128,7 @@ private sealed class PatchingModProp<T>(val type: Class<T>, val onFile: String) 
             defaultValue
         }
         override fun parseFile(lines: List<String>) = lines.mapTo(mutableSetOf()) { it.unescapeStringForFile() }
-        override fun writeFile(value: Set<String>) = value.sorted()
+        override fun writeFile(value: Set<String>) = value.map { it.escapeStringForFile() }.sorted()
     }
 
     open val defaultValue: T? = null
