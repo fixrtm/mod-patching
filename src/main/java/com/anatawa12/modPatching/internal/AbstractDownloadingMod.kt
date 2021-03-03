@@ -1,5 +1,6 @@
 package com.anatawa12.modPatching.internal
 
+import com.anatawa12.modPatching.DeobfuscateSrg
 import com.anatawa12.modPatching.DownloadingMod
 import com.anatawa12.modPatching.internal.Constants.COPY_MODS_INTO_MODS_DIR
 import com.anatawa12.modPatching.internal.Constants.DOWNLOAD_MODS
@@ -54,15 +55,12 @@ abstract class AbstractDownloadingMod(val project: Project) :
         val forgePlugin = project.forgePlugin
 
         val downloadTask = configureDownloadingTask(obfJarPath)
-        val deobfTask = project.tasks.create(deobfTaskName, DeobfuscateJar::class) {
-            setSrg(forgePlugin.delayedFile(SRG_SRG_TO_MCP))
-            setExceptorJson(forgePlugin.delayedFile(MCP_DATA_EXC_JSON))
-            setExceptorCfg(forgePlugin.delayedFile(EXC_MCP))
-            setFieldCsv(forgePlugin.delayedFile(CSV_FIELD))
-            setMethodCsv(forgePlugin.delayedFile(CSV_METHOD))
+        val deobfTask = project.tasks.create(deobfTaskName, DeobfuscateSrg::class) {
+            fieldCsv.set(project.provider(forgePlugin.delayedFile(CSV_FIELD)))
+            methodCsv.set(project.provider(forgePlugin.delayedFile(CSV_METHOD)))
 
-            setInJar(obfJarPath)
-            setOutJar(deobfJarPathProvider)
+            sourceJar.set(obfJarPath)
+            destination.set(deobfJarPathProvider)
 
             onlyIf { deobf }
             dependsOn(downloadTaskName,
