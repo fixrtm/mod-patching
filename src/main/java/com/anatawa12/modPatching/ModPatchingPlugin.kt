@@ -78,6 +78,7 @@ open class ModPatchingPlugin : Plugin<Project> {
         val preparePatchingEnvironment: Task by project.tasks.creating {
             group = "patching"
             dependsOn(prepareMods)
+            dependsOn(decompileMods)
             dependsOn(generateUnmodifieds)
         }
         project.tasks.getByName("setupCiWorkspace").dependsOn(preparePatchingEnvironment)
