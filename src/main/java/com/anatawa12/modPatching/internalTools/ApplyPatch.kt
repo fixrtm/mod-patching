@@ -51,7 +51,7 @@ fun main(args: Array<String>) {
                 .patch(false)
             src.resolve(javaName)
                 .apply { parentFile.mkdirs() }
-                .writeText(ctx.dst.joinToString("") { "$it\n" })
+                .writeText(ctx.dst.joinToString("\n"))
         }
     }
     patchingDir.flush()
