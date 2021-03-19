@@ -124,6 +124,9 @@ open class ModPatchingPlugin : Plugin<Project> {
             from (project.provider { project.zipTree(jarTask.archiveFile) }) {
                 inJarSpec = this
             }
+            from (project.provider { project.zipTree(jarTask.archiveFile) }) {
+                include("META-INF/MANIFEST.MF")
+            }
         }
         val regenerateJar = project.tasks.create(REGENERATE_JAR, Jar::class) {
             dependsOn(reprocessResources, generateBsdiffPatch)
