@@ -21,6 +21,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.CopySpec
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.bundling.Zip
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.*
 import org.gradle.util.JarUtil
@@ -128,10 +129,11 @@ open class ModPatchingPlugin : Plugin<Project> {
                 include("META-INF/MANIFEST.MF")
             }
         }
-        val regenerateJar = project.tasks.create(REGENERATE_JAR, Jar::class) {
+        val regenerateJar = project.tasks.create(REGENERATE_JAR, Zip::class) {
             dependsOn(reprocessResources, generateBsdiffPatch)
             destinationDirectory.set(Util.getBuildPath(project, "libs"))
             archiveVersion.set("")
+            archiveExtension.set("jar")
             from(reprocessResources.destinationDir)
             from(generateBsdiffPatch.outTo)
         }
