@@ -4,6 +4,7 @@ import com.anatawa12.modPatching.CurseDownloadingMod
 import com.anatawa12.modPatching.DownloadCurseModJar
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.create
 import org.gradle.util.GUtil.toLowerCamelCase
 import java.io.File
@@ -30,6 +31,7 @@ class CurseDownloadingModImpl(project: Project) : AbstractDownloadingMod(project
     }
 
     open class DownloadCurseModJar2 : DownloadCurseModJar() {
+        @get:Internal
         lateinit var mods: CurseDownloadingModImpl
 
         override fun download() {
