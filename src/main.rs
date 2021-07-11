@@ -6,7 +6,7 @@ mod select;
 use crate::doing_error::*;
 use crate::ext::*;
 use crate::patching_env::{parse_pathing_env, PatchingEnv};
-use diffy::{apply_all_bytes, ApplyOptions, Patch, PatchFormatter};
+use diffy::{apply_all_bytes, ApplyOptions, DiffOptions, Patch, PatchFormatter};
 use itertools::Itertools;
 use rayon::prelude::*;
 use select::Selector;
@@ -23,6 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     match args.next().expect("no execution type").as_str() {
         "add-modify" => command_add_modify()?,
         "apply-patches" => command_apply_patches()?,
+        "create-diff" => command_create_diff()?,
         name => panic!("unknown execution: {}", name),
     }
 
@@ -50,7 +51,16 @@ macro_rules! handle_none {
             v
         } else {
             return $blk;
-        };
+        }
+    };
+}
+
+macro_rules! handle_err {
+    ($val: expr => |$i: ident| $blk: expr) => {
+        match $val {
+            Ok(v) => v,
+            Err($i) => return $blk,
+        }
     };
 }
 
@@ -139,6 +149,18 @@ fn command_apply_patches() -> Result<(), Box<dyn std::error::Error>> {
         .into_iter()
         .par_bridge()
         .map(|mod_name| apply_patches(&env, mod_name))
+        .collect::<()>();
+
+    Ok(())
+}
+
+fn command_create_diff() -> Result<(), Box<dyn std::error::Error>> {
+    let env = parse_pathing_env()?;
+
+    env.mod_names()
+        .into_iter()
+        .par_bridge()
+        .map(|mod_name| create_diff(&env, mod_name))
         .collect::<()>();
 
     Ok(())
@@ -247,11 +269,16 @@ fn write_rej_file<'a>(
     Ok(())
 }
 
-fn write_slice_file(source: &[u8], to: impl AsRef<Path>) -> std::io::Result<()> {
+fn create_file_with_dir(to: impl AsRef<Path>) -> std::io::Result<File> {
     let to = to.as_ref();
     std::fs::create_dir_all(to.parent().unwrap())?;
-    File::create(to)?.buf_write().write_all(source)?;
-    Ok(())
+    File::create(to)
+}
+
+fn write_slice_file(source: &[u8], to: impl AsRef<Path>) -> std::io::Result<()> {
+    let mut write = create_file_with_dir(to)?.buf_write();
+    write.write_all(source)?;
+    write.flush()
 }
 
 fn remake_unmodified_classes_jar(env: &PatchingEnv, mod_name: &str) -> std::io::Result<()> {
@@ -270,4 +297,79 @@ fn remake_unmodified_classes_jar(env: &PatchingEnv, mod_name: &str) -> std::io::
     }
     writer.finish()?.flush()?;
     Ok(())
+}
+
+fn create_diff(env: &PatchingEnv, mod_name: impl AsRef<str>) {
+    let mod_name = mod_name.as_ref();
+
+    let formatter = PatchFormatter::new().with_space_on_empty_line();
+    let mut file_names = Vec::new();
+    let mut sources_jar = handle_none!(File::open(env.get_source_jar_path(mod_name)).ok()
+        .and_then(|x| ZipArchive::new(x.buf_read()).ok()) => {
+        eprintln!("ERROR: no source jar found for {}! broken workspace or not prepared!", mod_name);
+    });
+    let patch_root = env.get_patch_path(mod_name);
+    let source_root = env.get_source_path(mod_name);
+
+    env.get_modified_classes(mod_name)
+        .filter_map(|class_name| {
+            let file_name = format!("{}.java", class_name.replace(".", "/"));
+            file_names.push(file_name.clone());
+
+            let src = handle_none!(sources_jar
+                .by_name(&file_name)
+                .ok()
+                .and_then(|x| read_to_vec(x.size() as usize, x).ok()) => {
+                eprintln!("WARN: no source found for {}! broken workspace!", class_name);
+                None
+            });
+            Some((class_name, file_name, src))
+        })
+        .par_bridge()
+        .map(|(class_name, file_name, src)| {
+            create_diff_for(
+                &formatter,
+                class_name,
+                &file_name,
+                &src,
+                &source_root,
+                &patch_root,
+            )
+        })
+        .collect::<()>();
+}
+
+fn create_diff_for(
+    formatter: &PatchFormatter,
+    class_name: &str,
+    file_name: &str,
+    src: &[u8],
+    source_root: &Path,
+    patch_root: &Path,
+) {
+    let java_path = source_root.join(&file_name);
+    let patch_path = patch_root.join(&format!("{}.patch", &file_name));
+
+    let patch_size = std::fs::metadata(&patch_path)
+        .map(|x| x.len())
+        .unwrap_or(32);
+
+    let java_file = handle_none!(File::open(&java_path).and_then(|x| read_to_vec(patch_size as usize, x)).ok() => {
+        eprintln!("ERROR: no source code found for {}! broken workspace!", class_name);
+    });
+
+    let patch = DiffOptions::default()
+        .set_context_len(5)
+        .create_patch_bytes(src, &java_file)
+        .with_original(format!("a/{}", file_name).into_bytes())
+        .with_modified(format!("b/{}", file_name).into_bytes());
+
+    let mut patch_file = handle_err!(create_file_with_dir(patch_path) => |e| {
+        eprintln!("ERROR: can't create patch file for {}: {}", class_name, e);
+    })
+    .buf_write();
+
+    handle_err!(formatter.write_patch_into(&patch, &mut patch_file).and_then(|_| patch_file.flush()) => |e| {
+        eprintln!("ERROR: writing patch file for {}: {}", class_name, e);
+    });
 }
