@@ -3,10 +3,10 @@ use crossterm::tty::IsTty;
 use crossterm::*;
 use fuzzy_matcher::FuzzyMatcher;
 
-pub struct Selector<'a, 's, W: std::io::Write> {
+pub struct Selector<'a, S: AsRef<str>, W: std::io::Write> {
     tty: W,
-    items: &'a [&'s str],
-    filtered: Vec<(i64, usize, &'s str)>,
+    items: &'a [S],
+    filtered: Vec<(i64, usize, &'a S)>,
     last_height: u16,
     candidate_limit: u16,
     scroll: usize,
@@ -16,8 +16,8 @@ pub struct Selector<'a, 's, W: std::io::Write> {
 }
 
 // public apis
-impl<'a, 's> Selector<'a, 's, std::io::Stdout> {
-    pub fn new(items: &'a [&'s str]) -> Option<Self> {
+impl<'a, S: AsRef<str>> Selector<'a, S, std::io::Stdout> {
+    pub fn new(items: &'a [S]) -> Option<Self> {
         let stdout = std::io::stdout();
         if !stdout.is_tty() {
             return None;
@@ -26,8 +26,8 @@ impl<'a, 's> Selector<'a, 's, std::io::Stdout> {
     }
 }
 
-impl<'a, 's, W: std::io::Write> Selector<'a, 's, W> {
-    pub fn new_with(tty: W, items: &'a [&'s str]) -> Self {
+impl<'a, S: AsRef<str>, W: std::io::Write> Selector<'a, S, W> {
+    pub fn new_with(tty: W, items: &'a [S]) -> Self {
         Self {
             tty,
             items,
@@ -46,7 +46,7 @@ impl<'a, 's, W: std::io::Write> Selector<'a, 's, W> {
         self
     }
 
-    pub fn interact(mut self) -> crossterm::Result<&'s str> {
+    pub fn interact(mut self) -> crossterm::Result<usize> {
         self.init()?;
         loop {
             if let Some(value) = self.handle_event(event::read()?)? {
@@ -57,14 +57,14 @@ impl<'a, 's, W: std::io::Write> Selector<'a, 's, W> {
 }
 
 // internals
-impl<'a, 's, W: std::io::Write> Selector<'a, 's, W> {
+impl<'a, S: AsRef<str>, W: std::io::Write> Selector<'a, S, W> {
     fn init(&mut self) -> crossterm::Result<()> {
         terminal::enable_raw_mode()?;
         self.filtered = self
             .items
             .iter()
             .enumerate()
-            .map(|(i, x)| (0, i, *x))
+            .map(|(i, x)| (0, i, x))
             .collect();
         self.tty
             .queue(terminal::DisableLineWrap)?
@@ -73,7 +73,7 @@ impl<'a, 's, W: std::io::Write> Selector<'a, 's, W> {
         Ok(())
     }
 
-    fn handle_event(&mut self, event: event::Event) -> crossterm::Result<Option<&'s str>> {
+    fn handle_event(&mut self, event: event::Event) -> crossterm::Result<Option<usize>> {
         match event {
             Event::Key(e) => {
                 if e.modifiers.contains(KeyModifiers::CONTROL) {
@@ -143,7 +143,7 @@ impl<'a, 's, W: std::io::Write> Selector<'a, 's, W> {
             self.tty
                 .queue(terminal::Clear(terminal::ClearType::CurrentLine))?
                 .queue(style::Print(if i == self.selecting { "> " } else { "  " }))?
-                .queue(style::Print(line))?
+                .queue(style::Print(line.as_ref()))?
                 .queue(style::Print("\n"))?
                 .queue(cursor::MoveToColumn(0))?;
         }
@@ -168,12 +168,11 @@ impl<'a, 's, W: std::io::Write> Selector<'a, 's, W> {
         self.filtered.clear();
         let matcher = &self.matcher;
         let inputting = &self.inputting;
-        for v in self
-            .items
-            .iter()
-            .enumerate()
-            .flat_map(|(i, x)| matcher.fuzzy_match(x, inputting).map(|m| (m, i, *x)))
-        {
+        for v in self.items.iter().enumerate().flat_map(|(i, x)| {
+            matcher
+                .fuzzy_match(x.as_ref(), inputting)
+                .map(|m| (m, i, x))
+        }) {
             self.filtered.push(v)
         }
         self.filtered.sort_by_key(|x| std::cmp::Reverse(x.0));
@@ -181,11 +180,11 @@ impl<'a, 's, W: std::io::Write> Selector<'a, 's, W> {
         self.scroll = 0;
     }
 
-    pub(crate) fn handle_key_input(&mut self, key: KeyCode) -> crossterm::Result<Option<&'s str>> {
+    pub(crate) fn handle_key_input(&mut self, key: KeyCode) -> crossterm::Result<Option<usize>> {
         match key {
             KeyCode::Enter => {
-                if let Some((_, _, v)) = self.filtered.get(self.selecting) {
-                    return Ok(Some(*v));
+                if let Some((_, i, _)) = self.filtered.get(self.selecting) {
+                    return Ok(Some(*i));
                 }
             }
             KeyCode::Left => {}
@@ -249,7 +248,7 @@ impl<'a, 's, W: std::io::Write> Selector<'a, 's, W> {
     }
 }
 
-impl<W: std::io::Write> Drop for Selector<'_, '_, W> {
+impl<S: AsRef<str>, W: std::io::Write> Drop for Selector<'_, S, W> {
     fn drop(&mut self) {
         self.clear_list().ok();
         self.tty.flush().ok();
