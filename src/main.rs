@@ -17,17 +17,31 @@ use std::path::Path;
 use std::result::Result;
 use zip::{ZipArchive, ZipWriter};
 
+macro_rules! execution {
+    ($expr: expr => |$name: ident| $els: expr) => {
+        match $expr {
+            "add-modify" => return command_add_modify(),
+            "apply-patches" => return command_apply_patches(),
+            "create-diff" => return command_create_diff(),
+            $name => $els,
+        }
+    };
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = args();
-    args.next();
-    match args.next().expect("no execution type").as_str() {
-        "add-modify" => command_add_modify()?,
-        "apply-patches" => command_apply_patches()?,
-        "create-diff" => command_create_diff()?,
-        name => panic!("unknown execution: {}", name),
-    }
+    let my_name = args.next().expect("no executable name");
+    let my_name = Path::new(my_name.as_str())
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .trim_start_matches("pm.");
+    execution!(my_name => |_name| ());
 
-    Ok(())
+    execution!(args.next().expect("no executable name").as_str() => |name| {
+        panic!("unknown execution: {}", name)
+    })
 }
 
 macro_rules! handle_block {
