@@ -138,6 +138,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "diffy"
+version = "0.2.1"
+
+[[package]]
 name = "dtoa"
 version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -290,6 +294,7 @@ name = "mod-patching-rs"
 version = "0.1.0"
 dependencies = [
  "crossterm",
+ "diffy",
  "fuzzy-matcher",
  "itertools",
  "quick-error",

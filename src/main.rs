@@ -6,9 +6,14 @@ mod select;
 use crate::doing_error::*;
 use crate::ext::*;
 use crate::patching_env::{parse_pathing_env, PatchingEnv};
+use diffy::{apply_all_bytes, ApplyOptions, Patch, PatchFormatter};
+use itertools::Itertools;
+use rayon::prelude::*;
 use select::Selector;
 use std::env::args;
-use std::io::Write;
+use std::fs::File;
+use std::io::{Read, Write};
+use std::path::Path;
 use std::result::Result;
 use zip::{ZipArchive, ZipWriter};
 
@@ -17,6 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     args.next();
     match args.next().expect("no execution type").as_str() {
         "add-modify" => command_add_modify()?,
+        "apply-patches" => command_apply_patches()?,
         name => panic!("unknown execution: {}", name),
     }
 
@@ -35,6 +41,26 @@ macro_rules! handle_block {
             $blk
             Ok(())
         })()
+    };
+}
+
+macro_rules! handle_none {
+    ($val: expr => $blk: expr) => {
+        if let Some(v) = $val {
+            v
+        } else {
+            return $blk;
+        };
+    };
+}
+
+macro_rules! take_if {
+    (($expr: expr) if $cond: expr) => {
+        if $cond {
+            Some($expr)
+        } else {
+            None
+        }
     };
 }
 
@@ -103,6 +129,128 @@ fn command_add_modify() -> Result<(), Box<dyn std::error::Error>> {
     // 3. remake unmodified classes jar
     remake_unmodified_classes_jar(&env, &mod_name).doing("creating unmodified classes jar file")?;
 
+    Ok(())
+}
+
+fn command_apply_patches() -> Result<(), Box<dyn std::error::Error>> {
+    let env = parse_pathing_env()?;
+
+    env.mod_names()
+        .into_iter()
+        .par_bridge()
+        .map(|mod_name| apply_patches(&env, mod_name))
+        .collect::<()>();
+
+    Ok(())
+}
+
+fn apply_patches(env: &PatchingEnv, mod_name: impl AsRef<str>) {
+    let mod_name = mod_name.as_ref();
+
+    let formatter = PatchFormatter::new();
+    let mut file_names = Vec::new();
+    let mut sources_jar = handle_none!(File::open(env.get_source_jar_path(mod_name)).ok()
+        .and_then(|x| ZipArchive::new(x.buf_read()).ok()) => {
+        eprintln!("ERROR: no source jar found for {}! broken workspace or not prepared!", mod_name);
+    });
+    let patch_root = env.get_patch_path(mod_name);
+    let source_root = env.get_source_path(mod_name);
+
+    env.get_modified_classes(mod_name)
+        .filter_map(|class_name| {
+            let file_name = format!("{}.java", class_name.replace(".", "/"));
+            file_names.push(file_name.clone());
+
+            let src = handle_none!(sources_jar
+                .by_name(&file_name)
+                .ok()
+                .and_then(|x| read_to_vec(x.size() as usize, x).ok()) => {
+                eprintln!("WARN: no source found for {}! broken workspace!", class_name);
+                None
+            });
+            Some((class_name, file_name, src))
+        })
+        .par_bridge()
+        .map(|(class_name, file_name, src)| {
+            apply_patch_for(
+                &formatter,
+                class_name,
+                &file_name,
+                &src,
+                &source_root,
+                &patch_root,
+            )
+        })
+        .collect::<()>();
+}
+
+fn read_to_vec(capacity: usize, read: impl Read) -> std::io::Result<Vec<u8>> {
+    let mut vec = Vec::with_capacity(capacity);
+    read.buf_read().read_to_end(&mut vec)?;
+    Ok(vec)
+}
+
+fn apply_patch_for(
+    formatter: &PatchFormatter,
+    class_name: &str,
+    file_name: &str,
+    src: &[u8],
+    source_root: &Path,
+    patch_root: &Path,
+) {
+    let out_path = source_root.join(&file_name);
+    let patch_path = patch_root.join(&format!("{}.patch", &file_name));
+
+    let patch_size = std::fs::metadata(&patch_path)
+        .map(|x| x.len())
+        .unwrap_or(32);
+    let patch_file = handle_none!(File::open(&patch_path).and_then(|x| read_to_vec(patch_size as usize, x)).ok() => {
+        eprintln!("WARN: no valid patch found for {}! broken workspace!", class_name);
+        write_slice_file(&src, out_path).ok();
+    });
+    let patch_file = handle_none!(Patch::from_bytes(&patch_file).ok() => {
+        eprintln!("parsing patch for {} failed!", class_name);
+        write_slice_file(&src, out_path).ok();
+    });
+    let (applied, failed) = apply_all_bytes(src, &patch_file, ApplyOptions::new());
+    write_slice_file(&applied, out_path).ok();
+    if !failed.is_empty() {
+        eprintln!(
+            "hunks {hunks} failed for patch {class}",
+            hunks = failed.iter().map(|x| format!("#{}", *x + 1)).join(", "),
+            class = &class_name,
+        );
+        let rej_path = source_root.join(&format!("{}.rej", &file_name));
+        let rej_file = handle_none!(File::create(rej_path).ok() => {
+            eprintln!("crating .rej for {} failed!", class_name);
+        });
+
+        let hunks = patch_file
+            .hunks()
+            .iter()
+            .enumerate()
+            .filter_map(|(i, x)| take_if!((x) if failed.contains(&i)));
+        handle_none!(write_rej_file(formatter, rej_file.buf_write(), hunks).ok() => {
+            eprintln!("crating .rej for {} failed!", class_name);
+        });
+    }
+}
+
+fn write_rej_file<'a>(
+    formatter: &PatchFormatter,
+    mut out: impl Write,
+    hunks: impl Iterator<Item = &'a diffy::Hunk<'a, [u8]>>,
+) -> std::io::Result<()> {
+    for x in hunks {
+        formatter.write_hunk_into(&x, &mut out)?;
+    }
+    Ok(())
+}
+
+fn write_slice_file(source: &[u8], to: impl AsRef<Path>) -> std::io::Result<()> {
+    let to = to.as_ref();
+    std::fs::create_dir_all(to.parent().unwrap())?;
+    File::create(to)?.buf_write().write_all(source)?;
     Ok(())
 }
 

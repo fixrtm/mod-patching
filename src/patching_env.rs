@@ -52,6 +52,10 @@ impl PatchingEnv {
         Ok(())
     }
 
+    pub fn mod_names(&self) -> impl Iterator<Item = &str> {
+        self.main.mods.keys().map(|x| x.as_str())
+    }
+
     fn get_mod(&self, name: impl AsRef<str>) -> &ModInfo {
         self.main.mods.get(name.as_ref()).unwrap()
     }
@@ -63,6 +67,13 @@ impl PatchingEnv {
 
     pub fn add_modified_class(&mut self, name: impl AsRef<str>, class: String) {
         self.get_mod_mut(name).changed_classes.insert(class);
+    }
+
+    pub fn get_modified_classes(&self, name: impl AsRef<str>) -> impl Iterator<Item = &str> {
+        self.get_mod(name)
+            .changed_classes
+            .iter()
+            .map(String::as_str)
     }
 
     pub fn get_source_path(&self, name: impl AsRef<str>) -> PathBuf {
@@ -79,6 +90,10 @@ impl PatchingEnv {
 
     pub fn get_deobf_jar_path(&self, name: impl AsRef<str>) -> PathBuf {
         self.local.cache_base.join(&self.get_mod(name).deobf_jar)
+    }
+
+    pub fn get_source_jar_path(&self, name: impl AsRef<str>) -> PathBuf {
+        self.local.cache_base.join(&self.get_mod(name).source_jar)
     }
 }
 
