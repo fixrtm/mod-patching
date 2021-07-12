@@ -4,6 +4,12 @@ plugins {
 
 group = "com.anatawa12.mod-patching"
 version = "1.0.0-SNAPSHOT"
+
+subprojects {
+    group = rootProject.group
+    version = rootProject.version
+}
+
 /*
 publishing.publications.create<MavenPublication>("maven") {
     from(components["java"])
