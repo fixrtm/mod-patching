@@ -1,5 +1,7 @@
 plugins {
     `maven-publish`
+    kotlin("jvm") version "1.5.10" apply false
+    kotlin("kapt") version "1.5.10" apply false
 }
 
 group = "com.anatawa12.mod-patching"

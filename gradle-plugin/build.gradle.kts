@@ -1,7 +1,8 @@
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
-    kotlin("kapt") version "1.3.70"
+    kotlin("jvm")
+    kotlin("kapt")
     `maven-publish`
     signing
 }
