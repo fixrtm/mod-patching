@@ -9,8 +9,6 @@ jobs:
       matrix:
         include:
           # macOS: no cross on macOS
-          - target: aarch64-apple-darwin
-            os: macos-latest
           - target: x86_64-apple-darwin
             os: macos-latest
           # windows: with cross on ubuntu
