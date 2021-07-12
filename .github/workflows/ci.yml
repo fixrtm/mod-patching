@@ -1,0 +1,36 @@
+name: Ci for Rust
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build Rust
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v1
+
+      - name: setup variables
+        id: vars
+        shell: bash
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --release --verbose
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: mod-patching
+          path: target/release/mod-patching
