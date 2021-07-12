@@ -3,7 +3,7 @@ name: Ci for Rust
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-rust:
     name: Build Rust
     runs-on: ubuntu-latest
 
