@@ -1,4 +1,4 @@
-name: Ci for Rust
+name: Master Ci
 
 on: 
   push:
