@@ -60,4 +60,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: mod-patching-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/mod-patching${{ outputs.vars.ext }}
+          path: target/${{ matrix.target }}/release/mod-patching${{ steps.vars.output.ext }}
