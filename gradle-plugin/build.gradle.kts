@@ -25,8 +25,6 @@ dependencies {
     implementation("io.sigpipe:jbsdiff:1.0")
 }
 
-tasks.compileKotlin.get().kotlinOptions.freeCompilerArgs = listOf("-XXLanguage:+TrailingCommas", "-Xinline-classes")
-
 val pathingMod by gradlePlugin.plugins.creating {
     implementationClass = "com.anatawa12.modPatching.ModPatchingPlugin"
     id = "com.anatawa12.mod-patching"
