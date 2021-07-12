@@ -10,38 +10,22 @@ jobs:
         include:
           # macOS: no cross on macOS
           - target: aarch64-apple-darwin
-            extension: ""
-            cross: false
             os: macos-latest
           - target: x86_64-apple-darwin
-            extension: ""
-            cross: false
             os: macos-latest
           # windows: with cross on ubuntu
           - target: i686-pc-windows-gnu
-            extension: ".exe"
-            cross: true
             os: ubuntu-latest
           - target: x86_64-pc-windows-gnu
-            extension: ".exe"
-            cross: true
             os: ubuntu-latest
           # linux: with cross on ubuntu
           - target: aarch64-unknown-linux-gnu
-            extension: ""
-            cross: true
             os: ubuntu-latest
           - target: armv7-unknown-linux-gnueabihf
-            extension: ""
-            cross: true
             os: ubuntu-latest
           - target: i686-unknown-linux-gnu
-            extension: ""
-            cross: true
             os: ubuntu-latest
           - target: x86_64-unknown-linux-gnu
-            extension: ""
-            cross: true
             os: ubuntu-latest
 
     runs-on: ${{ matrix.os }}
@@ -56,14 +40,24 @@ jobs:
 
       - uses: Swatinem/rust-cache@v1
 
+      - name: setup variables
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${{ matrix.target }}" == *"windows"* ]]; then
+            echo '::set-output name=ext::.exe'
+          else
+            echo '::set-output name=ext::'
+          fi
+
       - name: Build
         uses: actions-rs/cargo@v1
         with:
-          use-cross: ${{ matrix.cross }}
+          use-cross: true
           command: build
           args: --release --target ${{ matrix.target }} --verbose
 
       - uses: actions/upload-artifact@v2
         with:
           name: mod-patching-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/mod-patching${{ matrix.extension }}
+          path: target/${{ matrix.target }}/release/mod-patching${{ outputs.vars.ext }}
