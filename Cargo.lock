@@ -263,7 +263,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mod-patching-rs"
+name = "mod-patching"
 version = "0.1.0"
 dependencies = [
  "crossterm",
