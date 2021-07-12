@@ -14,8 +14,6 @@ jobs:
           - target: x86_64-apple-darwin
             os: macos-latest
           # windows: with cross on ubuntu
-          - target: i686-pc-windows-gnu
-            os: ubuntu-latest
           - target: x86_64-pc-windows-gnu
             os: ubuntu-latest
           # linux: with cross on ubuntu
