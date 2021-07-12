@@ -19,10 +19,6 @@ jobs:
 
       - uses: Swatinem/rust-cache@v1
 
-      - name: setup variables
-        id: vars
-        shell: bash
-
       - name: Build
         uses: actions-rs/cargo@v1
         with:
