@@ -1,6 +1,9 @@
 name: Ci for Rust
 
-on: [ "push" ]
+on: 
+  push:
+    branches:
+      - master
 
 jobs:
   build:
