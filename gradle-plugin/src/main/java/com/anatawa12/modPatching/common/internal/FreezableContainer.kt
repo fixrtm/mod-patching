@@ -1,4 +1,4 @@
-package com.anatawa12.modPatching.internal
+package com.anatawa12.modPatching.common.internal
 
 interface FreezableContainer {
     fun freeze()

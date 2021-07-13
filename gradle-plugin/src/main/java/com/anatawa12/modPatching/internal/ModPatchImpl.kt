@@ -1,6 +1,15 @@
 package com.anatawa12.modPatching.internal
 
-import com.anatawa12.modPatching.*
+import com.anatawa12.modPatching.CheckSignatureModification
+import com.anatawa12.modPatching.DeobfuscateSrg
+import com.anatawa12.modPatching.GenerateBsdiffPatch
+import com.anatawa12.modPatching.ModPatch
+import com.anatawa12.modPatching.OnRepoPatchSource
+import com.anatawa12.modPatching.OnVCSPatchSource
+import com.anatawa12.modPatching.common.internal.AbstractDownloadingMod
+import com.anatawa12.modPatching.common.internal.CommonUtil
+import com.anatawa12.modPatching.common.internal.Delegates
+import com.anatawa12.modPatching.common.internal.FreezableContainer
 import com.anatawa12.modPatching.internal.Constants.CHECK_SIGNATURE
 import com.anatawa12.modPatching.internal.Constants.COPY_MODIFIED_CLASSES
 import com.anatawa12.modPatching.internal.Constants.DECOMPILE_MODS
@@ -10,11 +19,16 @@ import com.anatawa12.modPatching.internal.Constants.REPROCESS_RESOURCES
 import com.anatawa12.modPatching.internal.patchingDir.PatchingDir
 import net.minecraftforge.gradle.common.Constants
 import net.minecraftforge.gradle.tasks.fernflower.ApplyFernFlowerTask
+import net.minecraftforge.gradle.user.UserConstants
 import org.gradle.api.file.CopySpec
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.extra
+import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.getByName
+import org.gradle.kotlin.dsl.provideDelegate
 import java.io.File
 import java.util.zip.ZipFile
 
@@ -31,8 +45,7 @@ class ModPatchImpl(
 
     val sourcesJarPathProvider by lazy {
         mod.project.provider {
-            if (mod.deobf) mod.getMcpJarPathProvider("deobf-sources").get()
-            else mod.getJarPath("raw-sources")
+            getMcpJarPathProvider("deobf-sources").get()
         }
     }
     val srcDirPath by lazy { mod.project.file("src/main/$sourceTreeName") }
@@ -40,20 +53,45 @@ class ModPatchImpl(
     lateinit var unmodifiedsJarPath: File
         private set
 
+    val buildDir: File get() = Util.getBuildPath(mod.project, "mods", name)
+    fun getMcpJarPathProvider(classifier: String) = mod.cacheBaseDir
+        .resolve("${mod.cacheBaseName}-${Constants.REPLACE_MCP_CHANNEL}-${Constants.REPLACE_MCP_VERSION}-$classifier.jar")
+        .let { mod.project.provider(mod.project.forgePlugin.delayedFile(it.toString())) }
+
+    val deobfJarPathProvider by lazy { getMcpJarPathProvider("deobf") }
+
+    val obfJarPath by lazy { mod.getJarPath("raw") }
+    val deobfTaskName by lazy { mod.getTaskName("deobfuscate") }
+
     fun onAdd(patchingDir: PatchingDir) {
-        mod.configurationAddTo = null
-        mod.addToMods = false
         val project = mod.project
         val mainSourceSet = project.sourceSets["main"]
         mainSourceSet.java.srcDir(srcDirPath)
 
-        val modInfo = patchingDir.getOrNew(Util.escapePathElement(mod.name))
+        val forgePlugin = project.forgePlugin
+        val deobfTask = project.tasks.create(deobfTaskName, DeobfuscateSrg::class) {
+            fieldCsv.set(project.provider(forgePlugin.delayedFile(Constants.CSV_FIELD)))
+            methodCsv.set(project.provider(forgePlugin.delayedFile(Constants.CSV_METHOD)))
+
+            sourceJar.set(obfJarPath)
+            destination.set(deobfJarPathProvider)
+
+            dependsOn(mod.downloadTaskName,
+                Constants.TASK_GENERATE_SRGS,
+                UserConstants.TASK_EXTRACT_DEP_ATS,
+                UserConstants.TASK_DD_COMPILE,
+                UserConstants.TASK_DD_PROVIDED)
+        }
+
+        project.tasks.getByName(mod.prepareTaskName).dependsOn(deobfTask)
+
+        val modInfo = patchingDir.getOrNew(CommonUtil.escapePathElement(mod.name))
 
         val decompileTask = project.tasks.create(decompileTaskName, ApplyFernFlowerTask::class) {
-            dependsOn(mod.deobfTaskName, mod.downloadTaskName)
+            dependsOn(deobfTaskName, mod.downloadTaskName)
             classpath = project.files()
             forkedClasspath = project.configurations.getByName(Constants.CONFIG_FFI_DEPS)
-            setInJar(mod.finalJarProvider)
+            setInJar(deobfJarPathProvider)
             setOutJar(sourcesJarPathProvider)
         }
         project.tasks.getByName(DECOMPILE_MODS).dependsOn(decompileTask)
@@ -67,9 +105,9 @@ class ModPatchImpl(
         }
         if (onRepo == OnRepoPatchSource.MODIFIED) {
             val generateUnmodifiedsJarTask = project.tasks.create(generateUnmodifiedsJarTaskName, Zip::class) {
-                dependsOn(mod.deobfTaskName, mod.downloadTaskName)
-                from(project.zipTree(mod.finalJarProvider))
-                destinationDirectory.set(mod.buildDir)
+                dependsOn(deobfTaskName, mod.downloadTaskName)
+                from(project.zipTree(deobfJarPathProvider))
+                destinationDirectory.set(buildDir)
                 archiveBaseName.set(mod.cacheBaseName)
                 archiveClassifier.set("unmodifieds")
                 archiveVersion.set("")

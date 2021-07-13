@@ -1,8 +1,8 @@
-package com.anatawa12.modPatching
+package com.anatawa12.modPatching.common
 
-import com.anatawa12.modPatching.internal.FirstAndRestSequence
-import com.anatawa12.modPatching.internal.curse.CFWidgetApi
-import com.anatawa12.modPatching.internal.curse.ForgeSvcApi
+import com.anatawa12.modPatching.common.internal.FirstAndRestSequence
+import com.anatawa12.modPatching.common.internal.curse.CFWidgetApi
+import com.anatawa12.modPatching.common.internal.curse.ForgeSvcApi
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.buffer

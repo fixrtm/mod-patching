@@ -1,8 +1,9 @@
 package com.anatawa12.modPatching.internal
 
-import com.anatawa12.modPatching.DownloadingMod
 import com.anatawa12.modPatching.ModPatch
 import com.anatawa12.modPatching.ModPatchContainer
+import com.anatawa12.modPatching.common.DownloadingMod
+import com.anatawa12.modPatching.common.internal.AbstractDownloadingMod
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project

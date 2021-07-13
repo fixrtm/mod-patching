@@ -1,5 +1,6 @@
 package com.anatawa12.modPatching
 
+import com.anatawa12.modPatching.common.DownloadingMod
 import org.gradle.api.Named
 
 interface ModPatch : Named {

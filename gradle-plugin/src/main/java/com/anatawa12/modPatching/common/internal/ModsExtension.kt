@@ -1,8 +1,8 @@
-package com.anatawa12.modPatching.internal
+package com.anatawa12.modPatching.common.internal
 
-import com.anatawa12.modPatching.CurseDownloadingMod
-import com.anatawa12.modPatching.DownloadingMod
-import com.anatawa12.modPatching.ModsContainer
+import com.anatawa12.modPatching.common.CurseDownloadingMod
+import com.anatawa12.modPatching.common.DownloadingMod
+import com.anatawa12.modPatching.common.ModsContainer
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Namer

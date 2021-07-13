@@ -1,17 +1,22 @@
 package com.anatawa12.modPatching
 
-import com.anatawa12.modPatching.internal.*
+import com.anatawa12.modPatching.common.ModPatchingCommonPlugin
+import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_MODS
+import com.anatawa12.modPatching.internal.ClassPathGetter
 import com.anatawa12.modPatching.internal.Constants.CHECK_SIGNATURE
 import com.anatawa12.modPatching.internal.Constants.COPY_MODIFIED_CLASSES
-import com.anatawa12.modPatching.internal.Constants.COPY_MODS_INTO_MODS_DIR
 import com.anatawa12.modPatching.internal.Constants.DECOMPILE_MODS
-import com.anatawa12.modPatching.internal.Constants.DOWNLOAD_MODS
 import com.anatawa12.modPatching.internal.Constants.GENERATE_BSDIFF_PATCH
 import com.anatawa12.modPatching.internal.Constants.GENERATE_UNMODIFIEDS
 import com.anatawa12.modPatching.internal.Constants.REGENERATE_JAR
 import com.anatawa12.modPatching.internal.Constants.RENAME_SOURCE_NAME
 import com.anatawa12.modPatching.internal.Constants.REPROCESS_RESOURCES
+import com.anatawa12.modPatching.internal.ModPatchImpl
+import com.anatawa12.modPatching.internal.PatchingExtension
+import com.anatawa12.modPatching.internal.StartScriptGenerator
+import com.anatawa12.modPatching.internal.Util
 import com.anatawa12.modPatching.internal.patchingDir.PatchingDir
+import com.anatawa12.modPatching.internal.readTextOr
 import com.cloudbees.diff.Diff
 import net.minecraftforge.gradle.user.patcherUser.forge.ForgePlugin
 import net.minecraftforge.gradle.util.patching.ContextualPatch
@@ -19,28 +24,29 @@ import org.apache.commons.io.IOUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.CopySpec
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.creating
+import org.gradle.kotlin.dsl.extra
+import org.gradle.kotlin.dsl.getByName
+import org.gradle.kotlin.dsl.getValue
 import org.gradle.util.JarUtil
 
 @Suppress("unused")
 open class ModPatchingPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val patchingDir = PatchingDir.on(project.projectDir)
-
+        project.plugins.apply(ModPatchingCommonPlugin::class)
         project.plugins.apply(ForgePlugin::class.java)
-        val mods = ModsExtension(project)
-        project.extensions.add(ModsContainer::class.java, "mods", mods)
-        mods.all { (this as? AbstractDownloadingMod)?.onAdd() }
+
+        val patchingDir = PatchingDir.on(project.projectDir)
 
         val patches = PatchingExtension(project)
         project.extensions.add(ModPatchContainer::class.java, "patching", patches)
         patches.all { (this as? ModPatchImpl)?.onAdd(patchingDir) }
 
-        val downloadMods = project.tasks.create(DOWNLOAD_MODS)
         val decompileMods = project.tasks.create(DECOMPILE_MODS)
         val generateUnmodifieds = project.tasks.create(GENERATE_UNMODIFIEDS)
 
@@ -71,11 +77,8 @@ open class ModPatchingPlugin : Plugin<Project> {
             mainClassName = "com.anatawa12.modPatching.internalTools.ApplyPatch",
         )
 
-        val copyModsIntoModsDir = project.tasks.create(COPY_MODS_INTO_MODS_DIR)
-        project.tasks.findByName("runClient")?.dependsOn(copyModsIntoModsDir)
-        project.tasks.findByName("runServer")?.dependsOn(copyModsIntoModsDir)
 
-        val prepareMods = project.tasks.create(Constants.PREPARE_MODS)
+        val prepareMods = project.tasks.create(PREPARE_MODS)
         val preparePatchingEnvironment: Task by project.tasks.creating {
             group = "patching"
             dependsOn(prepareMods)
@@ -120,10 +123,10 @@ open class ModPatchingPlugin : Plugin<Project> {
         }
         val reprocessResources = project.tasks.create(REPROCESS_RESOURCES, Copy::class) {
             dependsOn("reobfJar")
-            var inJarSpec: CopySpec by this.extra
+            val copyTask = this
             destinationDir = Util.getBuildPath(project, "resources")
             from (project.provider { project.zipTree(jarTask.archiveFile) }) {
-                inJarSpec = this
+                copyTask.extra["inJarSpec"] = this
             }
             from (project.provider { project.zipTree(jarTask.archiveFile) }) {
                 include("META-INF/MANIFEST.MF")

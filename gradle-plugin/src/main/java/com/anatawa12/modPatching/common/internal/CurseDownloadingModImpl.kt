@@ -1,12 +1,11 @@
-package com.anatawa12.modPatching.internal
+package com.anatawa12.modPatching.common.internal
 
-import com.anatawa12.modPatching.CurseDownloadingMod
-import com.anatawa12.modPatching.DownloadCurseModJar
+import com.anatawa12.modPatching.common.CurseDownloadingMod
+import com.anatawa12.modPatching.common.DownloadCurseModJar
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.create
-import org.gradle.util.GUtil.toLowerCamelCase
 import java.io.File
 
 class CurseDownloadingModImpl(project: Project) : AbstractDownloadingMod(project), CurseDownloadingMod {
@@ -17,8 +16,8 @@ class CurseDownloadingModImpl(project: Project) : AbstractDownloadingMod(project
 
     override val nameDefault: String get() = id
 
-    override val cacheBaseDir get() = Util.getCachePath(project, "curse", id, version)
-    override val cacheBaseName get() = Util.escapePathElement("$id-$version")
+    override val cacheBaseDir get() = CommonUtil.getCachePath(project, "curse", id, version)
+    override val cacheBaseName get() = CommonUtil.escapePathElement("$id-$version")
     override val modGlobalIdentifier get() = "curse-$id-$version"
     override fun configureDownloadingTask(dest: File): Task {
         return project.tasks.create(downloadTaskName, DownloadCurseModJar2::class) {

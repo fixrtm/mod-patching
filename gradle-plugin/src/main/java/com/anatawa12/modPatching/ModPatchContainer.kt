@@ -1,5 +1,6 @@
 package com.anatawa12.modPatching
 
+import com.anatawa12.modPatching.common.DownloadingMod
 import groovy.lang.Closure
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectCollection

@@ -1,4 +1,4 @@
-package com.anatawa12.modPatching
+package com.anatawa12.modPatching.common
 
 import groovy.lang.Closure
 import org.gradle.api.Action

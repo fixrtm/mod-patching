@@ -1,4 +1,4 @@
-package com.anatawa12.modPatching.internal.curse
+package com.anatawa12.modPatching.common.internal.curse
 
 import com.squareup.moshi.JsonClass
 

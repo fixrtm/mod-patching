@@ -1,4 +1,4 @@
-package com.anatawa12.modPatching
+package com.anatawa12.modPatching.common
 
 interface CurseDownloadingMod : DownloadingMod {
     var id: String
