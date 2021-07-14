@@ -1,4 +1,4 @@
-package com.anatawa12.modPatching
+package com.anatawa12.modPatching.binary
 
 import com.anatawa12.modPatching.binary.internal.flatten
 import io.sigpipe.jbsdiff.Diff
@@ -16,10 +16,13 @@ import java.security.MessageDigest
 open class GenerateBsdiffPatch : DefaultTask() {
     @InputFiles
     var oldFiles = project.objects.listProperty(FileTree::class).convention(emptyList())
+
     @InputFiles
     var newFiles = project.objects.listProperty(FileTree::class).convention(emptyList())
+
     @OutputDirectory
     val outTo = project.objects.property(File::class)
+
     @Input
     val patchPrefix = project.objects.property(String::class)
 
@@ -30,14 +33,13 @@ open class GenerateBsdiffPatch : DefaultTask() {
         val outTo = outTo.get()
         val patchPrefix = patchPrefix.get()
 
-        check((oldFiles.keys - newFiles.keys).isEmpty()) { "some files are deleted: ${oldFiles.keys - newFiles.keys}" }
         check((newFiles.keys - oldFiles.keys).isEmpty()) { "some files are added: ${newFiles.keys - oldFiles.keys}" }
 
         val patchDir = outTo.resolve(patchPrefix)
         val sha1 = MessageDigest.getInstance("SHA-1")
 
         for ((newPath, newFile) in newFiles) {
-            val oldFile = oldFiles[newPath] ?: continue
+            val oldFile = oldFiles[newPath] ?: error("logic failre: $newPath")
 
             val oldBytes = oldFile.readBytes()
             val newBytes = newFile.readBytes()

@@ -1,11 +1,11 @@
 package com.anatawa12.modPatching.internal
 
-import com.anatawa12.modPatching.CheckSignatureModification
 import com.anatawa12.modPatching.DeobfuscateSrg
 import com.anatawa12.modPatching.GenerateBsdiffPatch
 import com.anatawa12.modPatching.ModPatch
 import com.anatawa12.modPatching.OnRepoPatchSource
 import com.anatawa12.modPatching.OnVCSPatchSource
+import com.anatawa12.modPatching.binary.CheckSignatureModification
 import com.anatawa12.modPatching.common.internal.AbstractDownloadingMod
 import com.anatawa12.modPatching.common.internal.CommonUtil
 import com.anatawa12.modPatching.common.internal.Delegates

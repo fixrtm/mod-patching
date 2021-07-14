@@ -1,9 +1,9 @@
-package com.anatawa12.modPatching.internal.signatureCheck
+package com.anatawa12.modPatching.binary.internal.signatureCheck
 
-import com.anatawa12.modPatching.internal.zipEitherByKey
+import com.anatawa12.modPatching.binary.internal.zipEitherByKey
 import org.gradle.api.file.FileTree
 import org.objectweb.asm.ClassReader
-import org.objectweb.asm.tree.*
+import org.objectweb.asm.tree.ClassNode
 import org.slf4j.Logger
 import java.io.File
 import java.lang.reflect.Modifier

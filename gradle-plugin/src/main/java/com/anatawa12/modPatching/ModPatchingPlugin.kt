@@ -1,5 +1,8 @@
 package com.anatawa12.modPatching
 
+import com.anatawa12.modPatching.binary.CheckSignatureModification
+import com.anatawa12.modPatching.binary.GenerateBsdiffPatch
+import com.anatawa12.modPatching.binary.RenameSourceName
 import com.anatawa12.modPatching.common.ModPatchingCommonPlugin
 import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_MODS
 import com.anatawa12.modPatching.internal.ClassPathGetter
@@ -78,7 +81,7 @@ open class ModPatchingPlugin : Plugin<Project> {
         )
 
 
-        val prepareMods = project.tasks.create(PREPARE_MODS)
+        val prepareMods = project.tasks.getByName(PREPARE_MODS)
         val preparePatchingEnvironment: Task by project.tasks.creating {
             group = "patching"
             dependsOn(prepareMods)

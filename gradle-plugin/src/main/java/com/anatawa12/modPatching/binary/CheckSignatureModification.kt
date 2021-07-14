@@ -1,7 +1,7 @@
-package com.anatawa12.modPatching
+package com.anatawa12.modPatching.binary
 
-import com.anatawa12.modPatching.internal.flatten
-import com.anatawa12.modPatching.internal.signatureCheck.SignatureChecker
+import com.anatawa12.modPatching.binary.internal.flatten
+import com.anatawa12.modPatching.binary.internal.signatureCheck.SignatureChecker
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.InputFiles
