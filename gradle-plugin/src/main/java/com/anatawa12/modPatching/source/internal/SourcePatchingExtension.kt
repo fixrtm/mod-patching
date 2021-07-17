@@ -13,10 +13,14 @@ class SourcePatchingExtension(private val project: Project) :
     NamedDomainObjectCollection<ModPatch> by project.container(ModPatch::class.java) {
     override var bsdiffPrefix: String = ""
     override var sourceNameSuffix: String = ""
+    override lateinit var mappingName: String
+    override lateinit var mcVersion: String
+    val mappingChannel get() = mappingName.substringBefore('_')
+    val mappingVersion get() = mappingName.substringAfter('-')
 
     override fun patch(mod: DownloadingMod, block: Action<ModPatch>): ModPatch {
         require(mod is AbstractDownloadingMod) { "unsupported DownloadingMod: $mod" }
-        return SourcePatchImpl(mod)
+        return SourcePatchImpl(mod, this)
             .apply(block::execute)
             .apply { freeze() }
             .also { add(it) }

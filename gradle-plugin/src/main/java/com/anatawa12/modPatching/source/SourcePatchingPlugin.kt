@@ -4,6 +4,7 @@ import com.anatawa12.modPatching.common.ModPatchingCommonPlugin
 import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_MODS
 import com.anatawa12.modPatching.source.internal.PatchingDir
 import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILE_MODS
+import com.anatawa12.modPatching.source.internal.SourceConstants.MAPPING_CONFIGURATION
 import com.anatawa12.modPatching.source.internal.SourcePatchImpl
 import com.anatawa12.modPatching.source.internal.SourcePatchingExtension
 import com.anatawa12.modPatching.source.internal.readTextOr
@@ -26,6 +27,18 @@ open class SourcePatchingPlugin : Plugin<Project> {
         val patches = SourcePatchingExtension(project)
         project.extensions.add(SourcePatchContainer::class.java, "patching", patches)
         patches.all { (this as? SourcePatchImpl)?.onAdd(patchingDir) }
+
+        project.configurations.maybeCreate(MAPPING_CONFIGURATION)
+
+        project.dependencies.add(
+            MAPPING_CONFIGURATION,
+            project.provider {
+                "de.oceanlabs.mcp" +
+                        ":mcp_${patches.mappingChannel}" +
+                        ":${patches.mappingVersion}-${patches.mcVersion}" +
+                        "@zip"
+            },
+        )
 
         val decompileMods = project.tasks.create(DECOMPILE_MODS)
 

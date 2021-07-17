@@ -9,9 +9,9 @@ import com.anatawa12.modPatching.internal.RelativePathFromProjectRoot
 import com.anatawa12.modPatching.source.DeobfuscateSrg
 import com.anatawa12.modPatching.source.ModPatch
 import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILE_MODS
+import com.anatawa12.modPatching.source.internal.SourceConstants.MAPPING_CONFIGURATION
 import net.minecraftforge.gradle.common.Constants
 import net.minecraftforge.gradle.tasks.fernflower.ApplyFernFlowerTask
-import net.minecraftforge.gradle.user.UserConstants
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.provideDelegate
@@ -19,6 +19,7 @@ import java.io.File
 
 class SourcePatchImpl(
     override val mod: AbstractDownloadingMod,
+    val extension: SourcePatchingExtension,
 ) : ModPatch, FreezableContainer by FreezableContainer.Impl("added") {
     init {
         require(mod.isFrozen()) { "the mod is not ready to make source patch." }
@@ -38,8 +39,7 @@ class SourcePatchImpl(
 
     @FrozenByFreeze(of = "mod")
     fun getMcpJarPath(classifier: String): RelativePathFromCacheRoot {
-        val replacer = mod.project.forgePlugin.replacer
-        return mod.getJarPath("${replacer.get("MAPPING_CHANNEL")}-${replacer.get("MAPPING_VERSION")}-$classifier")
+        return mod.getJarPath("${extension.mappingChannel}-${extension.mappingVersion}-$classifier")
     }
 
     @FrozenByFreeze(of = "mod")
@@ -53,19 +53,13 @@ class SourcePatchImpl(
         val mainSourceSet = project.sourceSets["main"]
         mainSourceSet.java.srcDir(srcDirPath.asFile(project))
 
-        val forgePlugin = project.forgePlugin
         val deobfTask = project.tasks.create(deobfTaskName, DeobfuscateSrg::class) {
-            fieldCsv.set(project.provider(forgePlugin.delayedFile(Constants.CSV_FIELD)))
-            methodCsv.set(project.provider(forgePlugin.delayedFile(Constants.CSV_METHOD)))
+            mappings.from(project.configurations.getByName(MAPPING_CONFIGURATION))
 
             sourceJar.set(mod.obfJarPath.asFile(project))
             destination.set(deobfJarPath.asFile(project))
 
-            dependsOn(mod.downloadTaskName,
-                Constants.TASK_GENERATE_SRGS,
-                UserConstants.TASK_EXTRACT_DEP_ATS,
-                UserConstants.TASK_DD_COMPILE,
-                UserConstants.TASK_DD_PROVIDED)
+            dependsOn(mod.downloadTaskName)
         }
 
         project.tasks.getByName(mod.prepareTaskName).dependsOn(deobfTask)
