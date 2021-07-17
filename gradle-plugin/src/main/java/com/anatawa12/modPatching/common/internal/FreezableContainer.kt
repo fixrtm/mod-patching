@@ -4,6 +4,7 @@ interface FreezableContainer {
     fun freeze()
     fun addFreezer(freezer: () -> Unit)
     fun checkFreeze(name: String)
+    fun isFrozen(): Boolean
 
     class Impl(val freezeWhen: String) : FreezableContainer {
         private val freezers = mutableListOf<() -> Unit>()
@@ -23,5 +24,7 @@ interface FreezableContainer {
             if (frozen)
                 error("$name cannot be assigned after $freezeWhen")
         }
+
+        override fun isFrozen(): Boolean = frozen
     }
 }

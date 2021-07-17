@@ -1,23 +1,22 @@
-package com.anatawa12.modPatching.internal
+package com.anatawa12.modPatching.source.internal
 
-import com.anatawa12.modPatching.ModPatch
-import com.anatawa12.modPatching.ModPatchContainer
 import com.anatawa12.modPatching.common.DownloadingMod
 import com.anatawa12.modPatching.common.internal.AbstractDownloadingMod
+import com.anatawa12.modPatching.source.ModPatch
+import com.anatawa12.modPatching.source.SourcePatchContainer
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project
 
-class PatchingExtension(private val project: Project) :
-    ModPatchContainer,
-    NamedDomainObjectCollection<ModPatch> by project.container(ModPatch::class.java)
-{
+class SourcePatchingExtension(private val project: Project) :
+    SourcePatchContainer,
+    NamedDomainObjectCollection<ModPatch> by project.container(ModPatch::class.java) {
     override var bsdiffPrefix: String = ""
     override var sourceNameSuffix: String = ""
 
     override fun patch(mod: DownloadingMod, block: Action<ModPatch>): ModPatch {
         require(mod is AbstractDownloadingMod) { "unsupported DownloadingMod: $mod" }
-        return ModPatchImpl(mod)
+        return SourcePatchImpl(mod)
             .apply(block::execute)
             .apply { freeze() }
             .also { add(it) }

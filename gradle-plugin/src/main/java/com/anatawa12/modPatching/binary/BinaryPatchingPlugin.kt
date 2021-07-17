@@ -1,6 +1,7 @@
 package com.anatawa12.modPatching.binary
 
 import com.anatawa12.modPatching.binary.internal.BinaryConstants.CHECK_SIGNATURE
+import com.anatawa12.modPatching.binary.internal.BinaryConstants.COPY_JAR
 import com.anatawa12.modPatching.binary.internal.BinaryConstants.COPY_MODIFIED_CLASSES
 import com.anatawa12.modPatching.binary.internal.BinaryConstants.GENERATE_BSDIFF_PATCH
 import com.anatawa12.modPatching.binary.internal.BinaryConstants.REGENERATE_JAR
@@ -73,7 +74,7 @@ open class BinaryPatchingPlugin : Plugin<Project> {
             }
             from(generateBsdiffPatch.outTo)
         }
-        val copyJar = project.tasks.create("copyJar") {
+        val copyJar = project.tasks.create(COPY_JAR) {
             dependsOn(regenerateJar)
             doLast {
                 regenerateJar.archiveFile.get().asFile.inputStream().use { src ->

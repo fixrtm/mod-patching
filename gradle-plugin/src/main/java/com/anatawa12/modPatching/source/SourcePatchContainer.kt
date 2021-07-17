@@ -1,4 +1,4 @@
-package com.anatawa12.modPatching
+package com.anatawa12.modPatching.source
 
 import com.anatawa12.modPatching.common.DownloadingMod
 import groovy.lang.Closure
@@ -6,7 +6,7 @@ import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.util.ConfigureUtil
 
-interface ModPatchContainer : NamedDomainObjectCollection<ModPatch> {
+interface SourcePatchContainer : NamedDomainObjectCollection<ModPatch> {
     var bsdiffPrefix: String
     var sourceNameSuffix: String
 

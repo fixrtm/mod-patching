@@ -1,6 +1,5 @@
 package com.anatawa12.modPatching.binary.internal
 
-import com.anatawa12.modPatching.common.internal.CommonUtil
 import org.gradle.api.Project
 import org.gradle.api.file.FileTree
 import java.io.File
@@ -11,7 +10,7 @@ object Util {
         var cache = project.buildDir
         cache = cache.resolve("patching-mod")
         for (pathElement in pathElements) {
-            cache = cache.resolve(CommonUtil.escapePathElement(pathElement))
+            cache = cache.resolve(pathElement)
         }
         return cache
     }

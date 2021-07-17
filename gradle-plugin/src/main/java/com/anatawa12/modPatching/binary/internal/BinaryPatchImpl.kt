@@ -23,9 +23,10 @@ class BinaryPatchImpl(
     override fun getName(): String = mod.name
 
     fun onAdd() {
+        require(mod.isFrozen()) { "mod is not added to container" }
         val project = mod.project
 
-        val obfJarFile by lazy { ZipFile(mod.obfJarPath) }
+        val obfJarFile by lazy { ZipFile(mod.obfJarPath.asFile(project)) }
 
         fun isModifiedElement(file: FileTreeElement): Boolean {
             // not exists: not modified element, is an original.

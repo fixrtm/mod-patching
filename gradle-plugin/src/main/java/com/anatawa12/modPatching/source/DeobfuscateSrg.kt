@@ -1,4 +1,4 @@
-package com.anatawa12.modPatching
+package com.anatawa12.modPatching.source
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputFile

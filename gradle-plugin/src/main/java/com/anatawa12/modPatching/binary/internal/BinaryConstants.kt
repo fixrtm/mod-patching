@@ -15,6 +15,9 @@ object BinaryConstants {
     // regenerates patch files with
     val REGENERATE_JAR = GUtil.toLowerCamelCase("regenerate jar")
 
+    // regenerates patch files with
+    val COPY_JAR = GUtil.toLowerCamelCase("copy jar")
+
     // check binary compatibility between original and new one
     val CHECK_SIGNATURE = GUtil.toLowerCamelCase("check signature")
 }

@@ -3,6 +3,7 @@ plugins {
     `java-gradle-plugin`
     kotlin("jvm")
     kotlin("kapt")
+    kotlin("plugin.serialization")
     `maven-publish`
     signing
 }
@@ -23,11 +24,29 @@ dependencies {
     //implementation("org.ow2.asm:asm:6.1")
     //implementation("org.ow2.asm:asm-commons:6.1")
     implementation("io.sigpipe:jbsdiff:1.0")
+    //implementation("org.yaml:snakeyaml:1.29")
+    implementation("com.charleskorn.kaml:kaml:0.34.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.2")
 }
 
 val pathingMod by gradlePlugin.plugins.creating {
     implementationClass = "com.anatawa12.modPatching.ModPatchingPlugin"
     id = "com.anatawa12.mod-patching"
+}
+
+val pathingModCommon by gradlePlugin.plugins.creating {
+    implementationClass = "com.anatawa12.modPatching.common.ModPatchingCommonPlugin"
+    id = "com.anatawa12.mod-patching.common"
+}
+
+val pathingModBinary by gradlePlugin.plugins.creating {
+    implementationClass = "com.anatawa12.modPatching.binary.BinaryPatchingPlugin"
+    id = "com.anatawa12.mod-patching.binary"
+}
+
+val pathingModSource by gradlePlugin.plugins.creating {
+    implementationClass = "com.anatawa12.modPatching.source.SourcePatchingPlugin"
+    id = "com.anatawa12.mod-patching.source"
 }
 
 publishing.publications.create<MavenPublication>("maven") {
@@ -92,3 +111,5 @@ publishing {
 tasks.withType<PublishToMavenRepository>().configureEach {
     onlyIf { publication.name != "pathingModPluginMarkerMaven" }
 }
+
+tasks.compileKotlin.get().kotlinOptions.freeCompilerArgs = listOf("-Xinline-classes")
