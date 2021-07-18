@@ -18,9 +18,10 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("com.squareup.moshi:moshi:1.11.0")
     // TODO: remove dependency relationship with ForgeGradle
-    implementation("com.anatawa12.forge:ForgeGradle:2.3-1.0.2")
-    //implementation("org.ow2.asm:asm:6.1")
-    //implementation("org.ow2.asm:asm-commons:6.1")
+    //implementation("com.anatawa12.forge:ForgeGradle:2.3-1.0.2")
+    implementation("org.ow2.asm:asm:6.1")
+    implementation("org.ow2.asm:asm-commons:6.1")
+    implementation("org.ow2.asm:asm-tree:6.1")
     implementation("io.sigpipe:jbsdiff:1.0")
     //implementation("org.yaml:snakeyaml:1.29")
     implementation("com.charleskorn.kaml:kaml:0.34.0")

@@ -9,7 +9,6 @@ import com.anatawa12.modPatching.source.internal.SourceConstants.MAPPING_CONFIGU
 import com.anatawa12.modPatching.source.internal.SourcePatchImpl
 import com.anatawa12.modPatching.source.internal.SourcePatchingExtension
 import com.anatawa12.modPatching.source.internal.readTextOr
-import net.minecraftforge.gradle.user.patcherUser.forge.ForgePlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -21,7 +20,6 @@ import org.gradle.kotlin.dsl.getValue
 open class SourcePatchingPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         project.plugins.apply(ModPatchingCommonPlugin::class)
-        project.plugins.apply(ForgePlugin::class.java)
 
         val patchingDir = PatchingDir.on(project.projectDir)
 
