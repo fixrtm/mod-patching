@@ -15,6 +15,7 @@ class SourcePatchingExtension(private val project: Project) :
     override var sourceNameSuffix: String = ""
     override lateinit var mappingName: String
     override lateinit var mcVersion: String
+    override lateinit var forgeFlowerVersion: String
     val mappingChannel get() = mappingName.substringBefore('_')
     val mappingVersion get() = mappingName.substringAfter('-')
 

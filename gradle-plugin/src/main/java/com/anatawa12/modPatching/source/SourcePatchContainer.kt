@@ -13,6 +13,7 @@ interface SourcePatchContainer : NamedDomainObjectCollection<ModPatch> {
     // channel_version
     var mappingName: String
     var mcVersion: String
+    var forgeFlowerVersion: String
 
     fun patch(mod: DownloadingMod, block: Action<ModPatch>): ModPatch
     fun patch(mod: DownloadingMod, block: Closure<*>): ModPatch = patch(mod, ConfigureUtil.configureUsing(block))

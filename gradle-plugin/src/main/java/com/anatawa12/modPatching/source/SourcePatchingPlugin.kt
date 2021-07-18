@@ -4,6 +4,7 @@ import com.anatawa12.modPatching.common.ModPatchingCommonPlugin
 import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_MODS
 import com.anatawa12.modPatching.source.internal.PatchingDir
 import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILE_MODS
+import com.anatawa12.modPatching.source.internal.SourceConstants.FORGEFLOWER_CONFIGURATION
 import com.anatawa12.modPatching.source.internal.SourceConstants.MAPPING_CONFIGURATION
 import com.anatawa12.modPatching.source.internal.SourcePatchImpl
 import com.anatawa12.modPatching.source.internal.SourcePatchingExtension
@@ -29,6 +30,7 @@ open class SourcePatchingPlugin : Plugin<Project> {
         patches.all { (this as? SourcePatchImpl)?.onAdd(patchingDir) }
 
         project.configurations.maybeCreate(MAPPING_CONFIGURATION)
+        project.configurations.maybeCreate(FORGEFLOWER_CONFIGURATION)
 
         project.dependencies.add(
             MAPPING_CONFIGURATION,
@@ -37,6 +39,13 @@ open class SourcePatchingPlugin : Plugin<Project> {
                         ":mcp_${patches.mappingChannel}" +
                         ":${patches.mappingVersion}-${patches.mcVersion}" +
                         "@zip"
+            },
+        )
+
+        project.dependencies.add(
+            FORGEFLOWER_CONFIGURATION,
+            project.provider {
+                "net.minecraftforge:forgeflower:${patches.forgeFlowerVersion}"
             },
         )
 

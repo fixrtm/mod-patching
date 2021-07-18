@@ -9,9 +9,9 @@ import com.anatawa12.modPatching.internal.RelativePathFromProjectRoot
 import com.anatawa12.modPatching.source.DeobfuscateSrg
 import com.anatawa12.modPatching.source.ModPatch
 import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILE_MODS
+import com.anatawa12.modPatching.source.internal.SourceConstants.FORGEFLOWER_CONFIGURATION
 import com.anatawa12.modPatching.source.internal.SourceConstants.MAPPING_CONFIGURATION
-import net.minecraftforge.gradle.common.Constants
-import net.minecraftforge.gradle.tasks.fernflower.ApplyFernFlowerTask
+import org.gradle.api.tasks.JavaExec
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.provideDelegate
@@ -64,12 +64,22 @@ class SourcePatchImpl(
 
         project.tasks.getByName(mod.prepareTaskName).dependsOn(deobfTask)
 
-        val decompileTask = project.tasks.create(decompileTaskName, ApplyFernFlowerTask::class) {
+        val decompileTask = project.tasks.create(decompileTaskName, JavaExec::class) {
             dependsOn(deobfTaskName, mod.downloadTaskName)
-            classpath = project.files()
-            forkedClasspath = project.configurations.getByName(Constants.CONFIG_FFI_DEPS)
-            setInJar(deobfJarPath)
-            setOutJar(sourcesJarPath)
+            classpath = project.configurations.getByName(FORGEFLOWER_CONFIGURATION)
+
+            args(
+                "-din=1",
+                "-rbr=1",
+                "-dgs=1",
+                "-asc=1",
+                "-rsy=1",
+                "-iec=1",
+                "-jvn=1",
+                "-log=TRACE",
+                deobfJarPath,
+                sourcesJarPath,
+            )
         }
         project.tasks.getByName(DECOMPILE_MODS).dependsOn(decompileTask)
 
