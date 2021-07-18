@@ -23,7 +23,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --verbose
+          args: --release --verbose --manifest-path cli-tool/Cargo.toml
 
       - uses: actions/upload-artifact@v2
         with:

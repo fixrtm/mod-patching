@@ -51,12 +51,12 @@ jobs:
             echo '::set-output name=ext::'
           fi
 
+      - name: Install Cross
+        run: cargo install cross
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --release --target ${{ matrix.target }} --verbose
+        run: |
+          cross build --release --target ${{ matrix.target }} --verbose
+        working-directory: cli-tool
 
       - uses: actions/upload-artifact@v2
         with:
