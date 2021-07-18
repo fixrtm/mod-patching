@@ -1,4 +1,4 @@
-package com.anatawa12.modPatching.common.internal.curse
+package com.anatawa12.modPatching.internal
 
 import kotlinx.serialization.Serializable
 

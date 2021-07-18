@@ -2,7 +2,7 @@ package com.anatawa12.modPatching.source
 
 import com.anatawa12.modPatching.common.ModPatchingCommonPlugin
 import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_MODS
-import com.anatawa12.modPatching.source.internal.PatchingDir
+import com.anatawa12.modPatching.internal.PatchingDir
 import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILE_MODS
 import com.anatawa12.modPatching.source.internal.SourceConstants.FORGEFLOWER_CONFIGURATION
 import com.anatawa12.modPatching.source.internal.SourceConstants.MAPPING_CONFIGURATION

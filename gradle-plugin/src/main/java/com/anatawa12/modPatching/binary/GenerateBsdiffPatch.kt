@@ -1,7 +1,8 @@
 package com.anatawa12.modPatching.binary
 
 import com.anatawa12.modPatching.binary.internal.flatten
-import io.sigpipe.jbsdiff.Diff
+import com.anatawa12.modPatching.internal.BsdiffPatchGenerator
+import org.apache.commons.compress.compressors.CompressorStreamFactory
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.Input
@@ -11,7 +12,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import java.io.File
-import java.security.MessageDigest
 
 open class GenerateBsdiffPatch : DefaultTask() {
     @InputFiles
@@ -26,40 +26,27 @@ open class GenerateBsdiffPatch : DefaultTask() {
     @Input
     val patchPrefix = project.objects.property(String::class)
 
+    @Input
+    val compressionMethod = project.objects.property(String::class).convention("bzip2")
+
     @TaskAction
     fun run() {
         val oldFiles = getAllFiles(oldFiles.get().flatten(project))
         val newFiles = getAllFiles(newFiles.get().flatten(project))
         val outTo = outTo.get()
         val patchPrefix = patchPrefix.get()
+        val compressionMethod = compressionMethod.get()
 
-        check((newFiles.keys - oldFiles.keys).isEmpty()) { "some files are added: ${newFiles.keys - oldFiles.keys}" }
-
-        val patchDir = outTo.resolve(patchPrefix)
-        val sha1 = MessageDigest.getInstance("SHA-1")
-
-        for ((newPath, newFile) in newFiles) {
-            val oldFile = oldFiles[newPath] ?: error("logic failre: $newPath")
-
-            val oldBytes = oldFile.readBytes()
-            val newBytes = newFile.readBytes()
-
-            val oldHashFile = patchDir.resolve("$newPath.old.sha1")
-            oldHashFile.parentFile.mkdirs()
-            oldHashFile.writeBytes(sha1.digest(oldBytes))
-
-            if (oldBytes.contentEquals(newBytes))
-                continue
-
-            val bsDiffFile = patchDir.resolve("$newPath.bsdiff")
-            val newHashFile = patchDir.resolve("$newPath.new.sha1")
-
-            bsDiffFile.parentFile.mkdirs()
-            newHashFile.parentFile.mkdirs()
-
-            Diff.diff(oldBytes, newBytes, bsDiffFile.outputStream())
-            newHashFile.writeBytes(sha1.digest(newBytes))
-        }
+        val compressorFactory = CompressorStreamFactory()
+        BsdiffPatchGenerator.generate(
+            oldFiles,
+            newFiles,
+            outputDirectory = outTo,
+            patchPrefix,
+            compression = {
+                compressorFactory.createCompressorOutputStream(compressionMethod, it)
+            }
+        )
     }
 
     private fun getAllFiles(fileTree: FileTree): Map<String, File> {

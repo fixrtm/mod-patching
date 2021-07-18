@@ -2,10 +2,11 @@ plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
     kotlin("jvm")
-    kotlin("plugin.serialization")
     `maven-publish`
     signing
 }
+
+evaluationDependsOn(":gradle-plugin-separated")
 
 repositories {
     mavenCentral()
@@ -14,24 +15,22 @@ repositories {
     }
 }
 
-dependencies {
-    implementation("com.squareup.okhttp3:okhttp:4.9.1")
-    implementation("com.squareup.moshi:moshi:1.11.0")
-    // TODO: remove dependency relationship with ForgeGradle
-    //implementation("com.anatawa12.forge:ForgeGradle:2.3-1.0.2")
-    implementation("org.ow2.asm:asm:6.1")
-    implementation("org.ow2.asm:asm-commons:6.1")
-    implementation("org.ow2.asm:asm-tree:6.1")
-    implementation("io.sigpipe:jbsdiff:1.0")
-    //implementation("org.yaml:snakeyaml:1.29")
-    implementation("com.charleskorn.kaml:kaml:0.34.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
+configurations.implementation {
+    extendsFrom(project(":gradle-plugin-separated").configurations["shadow"])
 }
 
-val pathingMod by gradlePlugin.plugins.creating {
-    implementationClass = "com.anatawa12.modPatching.ModPatchingPlugin"
-    id = "com.anatawa12.mod-patching"
+dependencies {
+    compileOnly(project(":gradle-plugin-separated")) {
+        exclude("org.jetbrains.kotlin")
+    }
+    implementation("org.apache.commons:commons-compress:1.21")
+    implementation("org.tukaani:xz:1.9")
+}
+
+tasks.jar {
+    val shadowJar by project(":gradle-plugin-separated").tasks.getting(Jar::class)
+    dependsOn(shadowJar)
+    from(provider { zipTree(shadowJar.archiveFile) })
 }
 
 val pathingModCommon by gradlePlugin.plugins.creating {
@@ -111,5 +110,3 @@ publishing {
 tasks.withType<PublishToMavenRepository>().configureEach {
     onlyIf { publication.name != "pathingModPluginMarkerMaven" }
 }
-
-tasks.compileKotlin.get().kotlinOptions.freeCompilerArgs = listOf("-Xinline-classes")

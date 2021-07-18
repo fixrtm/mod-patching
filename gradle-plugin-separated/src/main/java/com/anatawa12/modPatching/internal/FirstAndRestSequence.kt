@@ -1,4 +1,4 @@
-package com.anatawa12.modPatching.common.internal
+package com.anatawa12.modPatching.internal
 
 internal class FirstAndRestSequence<E : Any>(first: E, val rest: Iterator<E>): Sequence<E> {
     var first: E? = first

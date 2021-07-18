@@ -1,4 +1,4 @@
-package com.anatawa12.modPatching.source.internal
+package com.anatawa12.modPatching.internal
 
 import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.SerialName
@@ -44,17 +44,17 @@ class PatchingMainConfig {
 data class ModInfo(
     // relative from pathing mod root
     @SerialName("patch-path")
-    val patchPath: String,
+    val patchPath: RelativePathFromProjectRoot,
     @SerialName("source-path")
-    val sourcePath: String,
+    val sourcePath: RelativePathFromProjectRoot,
     @SerialName("unmodifieds-jar")
-    val unmodifiedsJar: String,
+    val unmodifiedsJar: RelativePathFromProjectRoot,
 
     // relative from pathing cache root
     @SerialName("source-jar")
-    val sourceJar: String,
+    val sourceJar: RelativePathFromCacheRoot,
     @SerialName("deobf-jar")
-    val deobfJar: String,
+    val deobfJar: RelativePathFromCacheRoot,
 
     // list of class names
     @SerialName("changed-classes")

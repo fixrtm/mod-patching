@@ -1,6 +1,5 @@
 package com.anatawa12.modPatching.internal
 
-import com.anatawa12.modPatching.common.internal.CommonUtil
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -8,18 +7,13 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import org.gradle.api.Project
-import kotlin.annotation.AnnotationTarget.*
 
-@Target(PROPERTY, FUNCTION, VALUE_PARAMETER)
-annotation class FrozenByFreeze(val of: String = "this")
-
+@JvmInline
 @Serializable(with = RelativePathFromCacheRoot.Serializer::class)
-inline class RelativePathFromCacheRoot(private val path: String) {
+value class RelativePathFromCacheRoot(private val path: String) {
     override fun toString(): String = path
 
     fun join(relative: String) = RelativePathFromCacheRoot("$path/$relative")
-    fun asFile(project: Project) = CommonUtil.getCacheBase(project).resolve(path)
 
     object Serializer : KSerializer<RelativePathFromCacheRoot> {
         override val descriptor: SerialDescriptor =
@@ -35,12 +29,12 @@ inline class RelativePathFromCacheRoot(private val path: String) {
     }
 }
 
+@JvmInline
 @Serializable(with = RelativePathFromProjectRoot.Serializer::class)
-inline class RelativePathFromProjectRoot(private val path: String) {
+value class RelativePathFromProjectRoot(private val path: String) {
     override fun toString(): String = path
 
-    fun join(relative: String) = RelativePathFromCacheRoot("$path/$relative")
-    fun asFile(project: Project) = project.projectDir.resolve(path)
+    fun join(relative: String) = RelativePathFromProjectRoot("$path/$relative")
 
     object Serializer : KSerializer<RelativePathFromProjectRoot> {
         override val descriptor: SerialDescriptor =

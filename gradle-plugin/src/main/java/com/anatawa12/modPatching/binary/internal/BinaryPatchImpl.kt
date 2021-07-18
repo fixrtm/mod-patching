@@ -9,6 +9,7 @@ import com.anatawa12.modPatching.binary.internal.BinaryConstants.GENERATE_BSDIFF
 import com.anatawa12.modPatching.common.internal.AbstractDownloadingMod
 import com.anatawa12.modPatching.common.internal.Delegates
 import com.anatawa12.modPatching.common.internal.FreezableContainer
+import com.anatawa12.modPatching.internal.asFile
 import org.gradle.api.file.FileTreeElement
 import org.gradle.api.tasks.Copy
 import org.gradle.jvm.tasks.Jar

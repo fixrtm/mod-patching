@@ -16,17 +16,6 @@ object Util {
     }
 }
 
-fun <K, V> Map<K, V>.zipEitherByKey(other: Map<K, V>): Map<K, Pair<V?, V?>> {
-    val result = mutableMapOf<K, Pair<V?, V?>>()
-    for ((k, v) in this) {
-        result[k] = v to other[k]
-    }
-    for (k in (other.keys - keys)) {
-        result[k] = null to other[k]
-    }
-    return result
-}
-
 fun Iterable<FileTree>.flatten(project: Project): FileTree {
     var tree = project.files().asFileTree
     forEach { tree += it }

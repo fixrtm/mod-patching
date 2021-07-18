@@ -3,6 +3,7 @@ package com.anatawa12.modPatching.common.internal
 import com.anatawa12.modPatching.common.CurseDownloadingMod
 import com.anatawa12.modPatching.common.DownloadCurseModJar
 import com.anatawa12.modPatching.internal.RelativePathFromCacheRoot
+import com.anatawa12.modPatching.internal.asFile
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.Internal

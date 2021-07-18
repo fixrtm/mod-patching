@@ -1,35 +1,29 @@
-package com.anatawa12.modPatching.binary.internal.signatureCheck
+package com.anatawa12.modPatching.internal
 
-import com.anatawa12.modPatching.binary.internal.zipEitherByKey
-import org.gradle.api.file.FileTree
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.ClassNode
 import org.slf4j.Logger
-import java.io.File
 import java.lang.reflect.Modifier
 
 class SignatureChecker {
     private val differences = mutableListOf<Difference>()
 
     fun check(
-        base: FileTree,
-        modified: FileTree,
+        base: Sequence<Pair<String, () -> ByteArray>>,
+        modifiedGetter: (String) -> ByteArray?,
         rootPackage: String,
     ) {
         val rootPackagePath = rootPackage.replace('.', '/')
         differences.clear()
 
-        val modifiedFiles = mutableMapOf<String, File>()
-        modified.visit { modifiedFiles[this.path] = this.file }
+        base.forEach { (path, bytesGetter) ->
+            if (!path.endsWith(".class")) return@forEach
+            if (!path.startsWith(rootPackagePath)) return@forEach
 
-        base.visit {
-            if (!path.endsWith(".class")) return@visit
-            if (!path.startsWith(rootPackagePath)) return@visit
+            val modifiedFile = modifiedGetter(path) ?: return@forEach
 
-            val modifiedFile = modifiedFiles[path] ?: return@visit
-
-            val baseClass = readClass(file.readBytes())
-            val modifiedClass = readClass(modifiedFile.readBytes())
+            val baseClass = readClass(bytesGetter())
+            val modifiedClass = readClass(modifiedFile)
 
             checkClass(path.removeSuffix(".class"), baseClass, modifiedClass)
         }
@@ -81,4 +75,15 @@ class SignatureChecker {
 private sealed class Difference {
     data class FieldOnlyInBase(val owner: String, val name: String, val desc: String) : Difference()
     data class MethodOnlyInBase(val owner: String, val name: String, val desc: String) : Difference()
+}
+
+private fun <K, V> Map<K, V>.zipEitherByKey(other: Map<K, V>): Map<K, Pair<V?, V?>> {
+    val result = mutableMapOf<K, Pair<V?, V?>>()
+    for ((k, v) in this) {
+        result[k] = v to other[k]
+    }
+    for (k in (other.keys - keys)) {
+        result[k] = null to other[k]
+    }
+    return result
 }
