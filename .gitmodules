@@ -1,0 +1,3 @@
+[submodule "diffy"]
+	path = cli-tool/diffy
+	url = https://github.com/anatawa12/diffy.git

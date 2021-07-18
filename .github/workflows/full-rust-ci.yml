@@ -1,0 +1,65 @@
+name: Master Ci
+
+on: 
+  push:
+    branches:
+      - master
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    name: (Cross) Build
+    strategy:
+      matrix:
+        include:
+          # macOS: no cross on macOS
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          # windows: with cross on ubuntu
+          - target: x86_64-pc-windows-gnu
+            os: ubuntu-latest
+          # linux: with cross on ubuntu
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: armv7-unknown-linux-gnueabihf
+            os: ubuntu-latest
+          - target: i686-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v1
+
+      - name: setup variables
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${{ matrix.target }}" == *"windows"* ]]; then
+            echo '::set-output name=ext::.exe'
+          else
+            echo '::set-output name=ext::'
+          fi
+
+      - name: Install Cross
+        run: cargo install cross
+      - name: Build
+        run: |
+          cross build --release --target ${{ matrix.target }} --verbose
+        working-directory: cli-tool
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: mod-patching-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/mod-patching${{ steps.vars.outputs.ext }}
