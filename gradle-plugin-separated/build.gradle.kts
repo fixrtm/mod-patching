@@ -33,6 +33,10 @@ dependencies {
     //shadow("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
 }
 
+tasks.jar {
+    from("license-info.md")
+}
+
 tasks.shadowJar {
     val basePkg = "com.anatawa12.modPatching.internal"
     relocate("kotlin.", "$basePkg.kotlin.")
