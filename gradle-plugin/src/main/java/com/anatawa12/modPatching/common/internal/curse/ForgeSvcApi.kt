@@ -1,6 +1,6 @@
 package com.anatawa12.modPatching.common.internal.curse
 
-import com.squareup.moshi.Moshi
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
@@ -14,13 +14,8 @@ object ForgeSvcApi {
         client.newCall(req).execute().use { res ->
             if (!res.isSuccessful)
                 throw IOException("unexpected code: $res")
-            return fileAdapter.fromJson(res.body!!.source())!!
+            return Json.decodeFromString(ForgeSvcFile.serializer(),
+                res.body!!.source().readString(Charsets.UTF_8))
         }
     }
-
-    private val moshi = Moshi.Builder()
-        .add { type, _, moshi -> if (type == ForgeSvcFile::class) ForgeSvcFileJsonAdapter(moshi) else null }
-        .build()
-
-    private val fileAdapter = moshi.adapter(ForgeSvcFile::class.java)
 }

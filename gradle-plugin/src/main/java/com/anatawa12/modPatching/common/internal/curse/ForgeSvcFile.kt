@@ -1,8 +1,8 @@
 package com.anatawa12.modPatching.common.internal.curse
 
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
 class ForgeSvcFile(
     val downloadUrl: String
 )

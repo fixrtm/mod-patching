@@ -2,7 +2,6 @@ plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
     kotlin("jvm")
-    kotlin("kapt")
     kotlin("plugin.serialization")
     `maven-publish`
     signing
@@ -18,7 +17,6 @@ repositories {
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("com.squareup.moshi:moshi:1.11.0")
-    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.11.0")
     // TODO: remove dependency relationship with ForgeGradle
     implementation("com.anatawa12.forge:ForgeGradle:2.3-1.0.2")
     //implementation("org.ow2.asm:asm:6.1")
@@ -27,6 +25,7 @@ dependencies {
     //implementation("org.yaml:snakeyaml:1.29")
     implementation("com.charleskorn.kaml:kaml:0.34.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
 }
 
 val pathingMod by gradlePlugin.plugins.creating {
