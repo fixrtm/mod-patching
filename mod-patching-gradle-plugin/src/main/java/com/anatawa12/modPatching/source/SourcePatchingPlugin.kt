@@ -21,7 +21,7 @@ open class SourcePatchingPlugin : Plugin<Project> {
         val patchingDir = PatchingDir.on(project.projectDir)
 
         val patches = SourcePatchingExtension(project)
-        project.extensions.add(SourcePatchContainer::class.java, "patching", patches)
+        project.extensions.add(SourcePatchContainer::class.java, "sourcePatching", patches)
         patches.all { (this as? SourcePatchImpl)?.onAdd(patchingDir) }
 
         project.configurations.maybeCreate(MAPPING_CONFIGURATION)
