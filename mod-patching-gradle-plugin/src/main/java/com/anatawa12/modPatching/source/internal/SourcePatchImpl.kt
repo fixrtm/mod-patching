@@ -13,7 +13,6 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.provideDelegate
-import java.io.File
 
 class SourcePatchImpl(
     override val mod: AbstractDownloadingMod,
@@ -32,8 +31,6 @@ class SourcePatchImpl(
     val sourcesJarPath by lazy { getMcpJarPath("deobf-sources") }
     val srcDirPath by lazy { RelativePathFromProjectRoot("src/main/$sourceTreeName") }
     val patchDirPath by lazy { RelativePathFromProjectRoot("src/main/$sourceTreeName-patches") }
-    lateinit var unmodifiedsJarPath: File
-        private set
 
     @FrozenByFreeze(of = "mod")
     fun getMcpJarPath(classifier: String): RelativePathFromCacheRoot {
@@ -81,14 +78,16 @@ class SourcePatchImpl(
         }
         project.tasks.getByName(DECOMPILE_MODS).dependsOn(decompileTask)
 
-        project.dependencies.add("implementation", project.files(unmodifiedsJarPath))
         val buildDir = RelativePathFromProjectRoot(project.buildDir.relativeTo(project.projectDir).path)
             .join("patching-mod/mods/$name")
+
+        val unmodifiedsJarPath = buildDir.join("${mod.cacheBaseName}-unmodifieds.jar")
+        project.dependencies.add("implementation", project.files(unmodifiedsJarPath.asFile(project)))
 
         patchingDir.main.mods[mod.name] = ModInfo(
             patchPath = patchDirPath,
             sourcePath = srcDirPath,
-            unmodifiedsJar = buildDir.join("${mod.cacheBaseName}-unmodifieds.jar"),
+            unmodifiedsJar = unmodifiedsJarPath,
 
             sourceJar = sourcesJarPath,
             deobfJar = deobfJarPath,
