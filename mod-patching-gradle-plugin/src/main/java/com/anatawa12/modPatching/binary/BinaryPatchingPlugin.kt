@@ -32,7 +32,7 @@ open class BinaryPatchingPlugin : Plugin<Project> {
         patches.all { (this as? BinaryPatchImpl)?.onAdd() }
 
         val prepareMods = project.tasks.getByName(PREPARE_MODS)
-        project.tasks.create("preparePatchingEnvironment") {
+        project.tasks.maybeCreate("preparePatchingEnvironment").apply {
             group = "patching"
             dependsOn(prepareMods)
         }

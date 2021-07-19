@@ -11,10 +11,7 @@ import com.anatawa12.modPatching.source.internal.SourcePatchingExtension
 import com.anatawa12.modPatching.source.internal.readTextOr
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.creating
-import org.gradle.kotlin.dsl.getValue
 
 @Suppress("unused")
 open class SourcePatchingPlugin : Plugin<Project> {
@@ -52,14 +49,11 @@ open class SourcePatchingPlugin : Plugin<Project> {
         // TODO: install patching-mod
 
         val prepareMods = project.tasks.getByName(PREPARE_MODS)
-        val preparePatchingEnvironment: Task by project.tasks.creating {
+        project.tasks.maybeCreate("preparePatchingEnvironment").apply {
             group = "patching"
             dependsOn(prepareMods)
             dependsOn(decompileMods)
         }
-        project.tasks.getByName("setupCiWorkspace").dependsOn(preparePatchingEnvironment)
-        project.tasks.getByName("setupDecompWorkspace").dependsOn(preparePatchingEnvironment)
-        project.tasks.getByName("setupDevWorkspace").dependsOn(preparePatchingEnvironment)
 
         project.afterEvaluate {
             val logger = project.logger
