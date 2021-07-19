@@ -1,4 +1,4 @@
-rootProject.name = "mod-patching-gradle-plugin"
+rootProject.name = "mod-patching"
 include("gradle-plugin-separated")
 include("mod-patching-gradle-plugin")
 
