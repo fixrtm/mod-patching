@@ -7,9 +7,6 @@ import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.util.ConfigureUtil
 
 interface SourcePatchContainer : NamedDomainObjectCollection<ModPatch> {
-    var bsdiffPrefix: String
-    var sourceNameSuffix: String
-
     // channel_version
     var mappingName: String
     var mcVersion: String

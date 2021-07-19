@@ -11,8 +11,6 @@ import org.gradle.api.Project
 class SourcePatchingExtension(private val project: Project) :
     SourcePatchContainer,
     NamedDomainObjectCollection<ModPatch> by project.container(ModPatch::class.java) {
-    override var bsdiffPrefix: String = ""
-    override var sourceNameSuffix: String = ""
     override lateinit var mappingName: String
     override lateinit var mcVersion: String
     override lateinit var forgeFlowerVersion: String
