@@ -1,5 +1,12 @@
 # patching mod creating gradle plugin
+
 [![a12 maintenance: Slowly](https://anatawa12.com/short.php?q=a12-slowly-svg)](https://anatawa12.com/short.php?q=a12-slowly-doc)
+
+**Now working on rewriting to remove relationship to ForgeGradle. Documentation may not correct for latest SNAPSHOT.
+See [at 85780a0]
+for documentation for latest SNAPSHOT**
+
+[at 85780a0]: https://github.com/anatawa12/mod-patching/tree/85780a0a28c9a7473d394b40ceef69f93f1bd906
 
 Features (checked means implemented)
 
@@ -8,8 +15,8 @@ Features (checked means implemented)
 - [x] decompiling mods
 - [x] making binary patch
 - [x] making source patch
-    - [ ] for workaround of decompiler bugs
-    - [x] for commits
+  - [ ] for workaround of decompiler bugs
+  - [x] for commits
 - [ ] making git hooks
     - [ ] for commit patches
 - [ ] making merge controller
