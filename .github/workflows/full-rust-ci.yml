@@ -39,6 +39,10 @@ jobs:
           toolchain: stable
           profile: minimal
           override: true
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '8'
 
       - uses: Swatinem/rust-cache@v1
 
@@ -56,10 +60,9 @@ jobs:
         run: cargo install cross
       - name: Build
         run: |
-          cross build --release --target ${{ matrix.target }} --verbose
-        working-directory: cli-tool
+          ./gradlew cli-tool:assemble -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=true
 
       - uses: actions/upload-artifact@v2
         with:
           name: mod-patching-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/mod-patching${{ steps.vars.outputs.ext }}
+          path: cli-tool/build/cargo/${{ matrix.target }}/release/mod-patching${{ steps.vars.outputs.ext }}

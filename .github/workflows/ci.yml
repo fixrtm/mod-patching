@@ -16,16 +16,18 @@ jobs:
           toolchain: stable
           profile: minimal
           override: true
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '8'
 
       - uses: Swatinem/rust-cache@v1
 
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --verbose --manifest-path cli-tool/Cargo.toml
+        run: |
+          ./gradlew build
 
       - uses: actions/upload-artifact@v2
         with:
           name: mod-patching
-          path: target/release/mod-patching
+          path: cli-tool/build/cargo/*/release/mod-patching
