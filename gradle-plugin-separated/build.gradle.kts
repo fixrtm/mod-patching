@@ -34,11 +34,11 @@ dependencies {
 }
 
 tasks.jar {
-    from("license-info.md")
 }
 
 tasks.shadowJar {
     val basePkg = "com.anatawa12.modPatching.internal"
+    from("license-info.md")
     relocate("kotlin.", "$basePkg.kotlin.")
     relocate("kotlinx.", "$basePkg.kotlinx.")
     relocate("com.charleskorn.kaml.", "$basePkg.kaml.")
