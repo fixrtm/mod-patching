@@ -63,5 +63,6 @@ data class ModInfo(
 
 @Serializable
 data class LocalConfig(
+    @SerialName("cache-base")
     val cache_base: String,
 )
