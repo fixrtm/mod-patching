@@ -55,17 +55,25 @@ jobs:
         id: vars
         shell: bash
         run: |
+          # if target is windows, extension is exe
           if [[ "${{ matrix.target }}" == *"windows"* ]]; then
             echo '::set-output name=ext::.exe'
           else
             echo '::set-output name=ext::'
           fi
+          # if linux, use cross but not for other platforms
+          if [[ "$(uname -srm)" == *"Linux"* ]]; then
+            echo '::set-output name=cross::true'
+          else
+            echo '::set-output name=cross::false'
+          fi
 
       - name: Install Cross
         run: cargo install cross
+        if: ${{ fromJson(steps.vars.outputs.cross) }}
       - name: Build
         run: |
-          ./gradlew cli-tool:assemble -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=true
+          ./gradlew cli-tool:assemble -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
 
       - uses: actions/upload-artifact@v2
         with:
