@@ -1,21 +1,24 @@
-mod doing_error;
-mod ext;
-mod patching_env;
-mod select;
-
-use crate::doing_error::*;
-use crate::ext::*;
-use crate::patching_env::{parse_pathing_env, PatchingEnv};
-use diffy::{apply_all_bytes, ApplyOptions, DiffOptions, Patch, PatchFormatter};
-use itertools::Itertools;
-use rayon::prelude::*;
-use select::Selector;
 use std::env::args;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;
 use std::result::Result;
+
+use diffy::{apply_all_bytes, ApplyOptions, DiffOptions, Patch, PatchFormatter};
+use itertools::Itertools;
+use rayon::prelude::*;
 use zip::{ZipArchive, ZipWriter};
+
+use select::Selector;
+
+use crate::doing_error::*;
+use crate::ext::*;
+use crate::patching_env::{parse_pathing_env, PatchingEnv};
+
+mod doing_error;
+mod ext;
+mod patching_env;
+mod select;
 
 macro_rules! execution {
     ($expr: expr => |$name: ident| $els: expr) => {
@@ -23,6 +26,7 @@ macro_rules! execution {
             "add-modify" => return command_add_modify(),
             "apply-patches" => return command_apply_patches(),
             "create-diff" => return command_create_diff(),
+            "--help" | "help" => return command_help(),
             $name => $els,
         }
     };
@@ -86,6 +90,19 @@ macro_rules! take_if {
             None
         }
     };
+}
+
+fn command_help() -> Result<(), Box<dyn std::error::Error>> {
+    eprintln!("mod-patching-cli-tool");
+    eprintln!("(c) 2021 anatawa12 and other contributors");
+    eprintln!();
+    eprintln!("SUBCOMMANDS: ");
+    eprintln!("    add-modify       add classes to modify");
+    eprintln!("    apply-patches    applies patches to source code.");
+    eprintln!("                     this drops all existing source.");
+    eprintln!("    create-diff      creates patch file to commit");
+    eprintln!("    help             show this message");
+    Ok(())
 }
 
 fn command_add_modify() -> Result<(), Box<dyn std::error::Error>> {
