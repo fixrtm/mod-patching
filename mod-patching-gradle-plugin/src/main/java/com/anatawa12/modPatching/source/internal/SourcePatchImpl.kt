@@ -84,7 +84,8 @@ class SourcePatchImpl(
         val unmodifiedsJarPath = buildDir.join("${mod.cacheBaseName}-unmodifieds.jar")
         project.dependencies.add("implementation", project.files(unmodifiedsJarPath.asFile(project)))
 
-        patchingDir.main.mods[mod.name] = ModInfo(
+        // TODO: keep modifiedClasses
+        patchingDir.main.mods[mod.name] = ModInfo.create(
             patchPath = patchDirPath,
             sourcePath = srcDirPath,
             unmodifiedsJar = unmodifiedsJarPath,

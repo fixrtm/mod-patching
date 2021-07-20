@@ -59,7 +59,23 @@ data class ModInfo(
     // list of class names
     @SerialName("changed-classes")
     val changedClasses: MutableSet<String> = mutableSetOf(),
-)
+) {
+    companion object {
+        fun create(
+            patchPath: RelativePathFromProjectRoot,
+            sourcePath: RelativePathFromProjectRoot,
+            unmodifiedsJar: RelativePathFromProjectRoot,
+            sourceJar: RelativePathFromCacheRoot,
+            deobfJar: RelativePathFromCacheRoot,
+        ) = ModInfo(
+            patchPath,
+            sourcePath,
+            unmodifiedsJar,
+            sourceJar,
+            deobfJar,
+        )
+    }
+}
 
 @Serializable
 data class LocalConfig(
