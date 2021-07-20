@@ -13,6 +13,7 @@ jobs:
   build:
     name: (Cross) Build
     strategy:
+      fail-fast: false
       matrix:
         include:
           # macOS: no cross on macOS
