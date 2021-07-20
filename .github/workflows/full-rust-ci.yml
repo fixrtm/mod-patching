@@ -74,6 +74,8 @@ jobs:
         run: cargo install cross
         if: ${{ fromJson(steps.vars.outputs.cross) }}
       - name: Build
+        env:
+          RUSTFLAGS: -C target-feature=+crt-static
         run: |
           ./gradlew cli-tool:assemble -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
 
