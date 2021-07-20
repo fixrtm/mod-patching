@@ -44,6 +44,7 @@ jobs:
           toolchain: stable
           profile: minimal
           override: true
+          target: ${{ matrix.target }}
       - uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
