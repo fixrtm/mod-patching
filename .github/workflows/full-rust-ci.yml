@@ -20,18 +20,18 @@ jobs:
           - target: x86_64-apple-darwin
             os: macos-latest
           # windows: with cross on ubuntu
-          - target: x86_64-pc-windows-gnu
-            os: ubuntu-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
           - target: aarch64-pc-windows-msvc
             os: windows-latest
           # linux: with cross on ubuntu
-          - target: aarch64-unknown-linux-gnu
+          - target: aarch64-unknown-linux-musl
             os: ubuntu-latest
-          - target: armv7-unknown-linux-gnueabihf
+          - target: armv7-unknown-linux-musleabihf
             os: ubuntu-latest
-          - target: i686-unknown-linux-gnu
+          - target: i686-unknown-linux-musl
             os: ubuntu-latest
-          - target: x86_64-unknown-linux-gnu
+          - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
 
     runs-on: ${{ matrix.os }}
