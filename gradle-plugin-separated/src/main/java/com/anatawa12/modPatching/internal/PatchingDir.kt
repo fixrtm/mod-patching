@@ -62,6 +62,7 @@ data class ModInfo(
 ) {
     companion object {
         fun create(
+            base: ModInfo?,
             patchPath: RelativePathFromProjectRoot,
             sourcePath: RelativePathFromProjectRoot,
             unmodifiedsJar: RelativePathFromProjectRoot,
@@ -73,6 +74,7 @@ data class ModInfo(
             unmodifiedsJar,
             sourceJar,
             deobfJar,
+            base?.changedClasses ?: mutableSetOf(),
         )
     }
 }
