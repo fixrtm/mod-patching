@@ -19,6 +19,9 @@ jobs:
           # macOS: no cross on macOS
           - target: x86_64-apple-darwin
             os: macos-latest
+          # waiting for approval 
+          # - target: aarch64-apple-darwin
+          #   os: macos-11
           # windows: with cross on ubuntu
           - target: aarch64-pc-windows-msvc
             os: windows-latest
