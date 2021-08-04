@@ -1,4 +1,5 @@
 plugins {
+    id("com.anatawa12.compile-time-constant")
     `kotlin-dsl`
     `java-gradle-plugin`
     kotlin("jvm")
@@ -60,4 +61,9 @@ publishing.publications.create<MavenPublication>("maven") {
 
 tasks.withType<PublishToMavenRepository>().configureEach {
     onlyIf { publication.name != "pathingModPluginMarkerMaven" }
+}
+
+tasks.createCompileTimeConstant {
+    constantsClass = "com.anatawa12.modPatching.internal.Constants"
+    values(mapOf("VERSION_NAME" to project.version.toString()))
 }

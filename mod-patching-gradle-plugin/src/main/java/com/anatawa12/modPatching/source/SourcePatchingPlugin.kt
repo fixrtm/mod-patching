@@ -2,16 +2,20 @@ package com.anatawa12.modPatching.source
 
 import com.anatawa12.modPatching.common.ModPatchingCommonPlugin
 import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_PATCHING_ENVIRONMENT
+import com.anatawa12.modPatching.internal.Constants.VERSION_NAME
 import com.anatawa12.modPatching.internal.PatchingDir
+import com.anatawa12.modPatching.source.internal.*
 import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILE_MODS
 import com.anatawa12.modPatching.source.internal.SourceConstants.FORGEFLOWER_CONFIGURATION
+import com.anatawa12.modPatching.source.internal.SourceConstants.INSTALL_SOURCE_UTIL_GLOBALLY
+import com.anatawa12.modPatching.source.internal.SourceConstants.INSTALL_SOURCE_UTIL_LOCALLY
 import com.anatawa12.modPatching.source.internal.SourceConstants.MAPPING_CONFIGURATION
-import com.anatawa12.modPatching.source.internal.SourcePatchImpl
-import com.anatawa12.modPatching.source.internal.SourcePatchingExtension
-import com.anatawa12.modPatching.source.internal.readTextOr
+import com.anatawa12.modPatching.source.internal.SourceConstants.MOD_PATCHING_SOURCE_UTIL_CLI_CONFIGURATION
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.create
+import java.io.File
 
 @Suppress("unused")
 open class SourcePatchingPlugin : Plugin<Project> {
@@ -26,6 +30,7 @@ open class SourcePatchingPlugin : Plugin<Project> {
 
         project.configurations.maybeCreate(MAPPING_CONFIGURATION)
         project.configurations.maybeCreate(FORGEFLOWER_CONFIGURATION)
+        project.configurations.maybeCreate(MOD_PATCHING_SOURCE_UTIL_CLI_CONFIGURATION)
 
         project.dependencies.add(
             MAPPING_CONFIGURATION,
@@ -44,12 +49,42 @@ open class SourcePatchingPlugin : Plugin<Project> {
             },
         )
 
+        project.dependencies.add(
+            MOD_PATCHING_SOURCE_UTIL_CLI_CONFIGURATION,
+            project.provider {
+                "com.anatawa12.mod-patching:cli-tool:${VERSION_NAME}:${getDownloadTriple(project)}@exe"
+            },
+        )
+
         val decompileMods = project.tasks.create(DECOMPILE_MODS)
 
-        // TODO: install patching-mod
+        val installSourceUtilLocally =
+            project.tasks.create(INSTALL_SOURCE_UTIL_LOCALLY, InstallSourcePatchingUtil::class) {
+                destination.set(project.layout.projectDirectory)
+                prefix.set("pm")
+            }
+
+        project.tasks.create(INSTALL_SOURCE_UTIL_GLOBALLY, InstallSourcePatchingUtil::class) {
+            outputs.cacheIf { false }
+            destination.set(
+                project.layout.dir(
+                    project.providers
+                        .gradleProperty("sourceUtilInstallation")
+                        .forUseAtConfigurationTime()
+                        .map { File(it) })
+                    .orElse(project.provider {
+                        throw IllegalStateException("please specify installation directory via " +
+                                "'-PsourceUtilInstallation=/path/to/dir'")
+                    }))
+            prefix.set(project.providers
+                .gradleProperty("binaryPrefix")
+                .forUseAtConfigurationTime()
+                .orElse(""))
+        }
 
         project.tasks.getByName(PREPARE_PATCHING_ENVIRONMENT).apply {
             dependsOn(decompileMods)
+            dependsOn(installSourceUtilLocally)
         }
 
         project.afterEvaluate {
@@ -58,6 +93,34 @@ open class SourcePatchingPlugin : Plugin<Project> {
                 logger.warn("pm.* is not git ignored! generated patching mod utility should be ignored because " +
                         "they're environment dependent.")
             }
+        }
+    }
+
+    private fun getDownloadTriple(project: Project): String {
+        return project.providers
+            .gradleProperty("com.anatawa12.patching-mod.cli.triple")
+            .forUseAtConfigurationTime()
+            .orElse(project.provider(::computeCurrentTargetTriple))
+            .get()
+    }
+
+    companion object {
+        private val targetTriples = mapOf(
+            (OperatingSystem.MACOS to Architecture.X64) to "x86_64-apple-darwin",
+            (OperatingSystem.MACOS to Architecture.ARM64) to "aarch64-apple-darwin",
+            (OperatingSystem.WINDOWS to Architecture.ARM64) to "aarch64-pc-windows-msvc",
+            (OperatingSystem.WINDOWS to Architecture.X86) to "i686-pc-windows-msvc",
+            (OperatingSystem.WINDOWS to Architecture.X64) to "x86_64-pc-windows-msvc",
+            (OperatingSystem.WINDOWS to Architecture.ARM64) to "aarch64-unknown-linux-musl",
+            (OperatingSystem.WINDOWS to Architecture.ARM32) to "armv7-unknown-linux-musleabihf",
+            (OperatingSystem.WINDOWS to Architecture.X86) to "i686-unknown-linux-musl",
+            (OperatingSystem.WINDOWS to Architecture.X64) to "x86_64-unknown-linux-musl",
+        )
+
+        private fun computeCurrentTargetTriple(): String {
+            return targetTriples[OperatingSystem.current to Architecture.current]
+                ?: error("${OperatingSystem.current} on ${Architecture.current} is not (yet) supported!" +
+                        "please make issue on https://github.com/anatawa12/mod-patching/issues")
         }
     }
 }

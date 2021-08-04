@@ -1,4 +1,5 @@
 plugins {
+    id("com.anatawa12.compile-time-constant") version "1.0.3" apply false
     id("com.github.johnrengelman.shadow") version "5.2.0"
     kotlin("jvm") version "1.5.10" apply false
     kotlin("plugin.serialization") version "1.5.10" apply false
