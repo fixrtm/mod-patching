@@ -28,7 +28,7 @@ class SourcePatchImpl(
     val decompileTaskName by lazy { mod.getTaskName("decompile") }
 
     @FrozenByFreeze(of = "mod")
-    val sourcesJarPath by lazy { getMcpJarPath("deobf-sources") }
+    val sourcesJarPath by lazy { getMcpJarPath("deobf-${extension.forgeFlowerVersion}-sources") }
     val srcDirPath by lazy { RelativePathFromProjectRoot("src/main/$sourceTreeName") }
     val patchDirPath by lazy { RelativePathFromProjectRoot("src/main/$sourceTreeName-patches") }
 
