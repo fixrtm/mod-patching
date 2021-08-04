@@ -40,17 +40,17 @@ class BinaryPatchImpl(
         val jar = project.tasks.getByName("jar", Jar::class)
         project.tasks.getByName(COPY_MODIFIED_CLASSES, Copy::class).apply {
             dependsOn(mod.downloadTaskName)
-            inputs.file(mod.obfJarPath)
+            inputs.file(mod.obfJarPath.asFile(project))
             from(project.provider { project.zipTree(jar.archiveFile) }) {
                 include { it.path.endsWith(".class") && isModifiedElement(it) }
             }
         }
         project.tasks.getByName(CHECK_SIGNATURE, CheckSignatureModification::class).apply {
-            baseClasses.add(project.provider { project.zipTree(mod.obfJarPath) })
+            baseClasses.add(project.provider { project.zipTree(mod.obfJarPath.asFile(project)) })
         }
         project.tasks.getByName(GENERATE_BSDIFF_PATCH, GenerateBsdiffPatch::class).apply {
             dependsOn(mod.downloadTaskName)
-            oldFiles.add(project.provider { project.zipTree(mod.obfJarPath) })
+            oldFiles.add(project.provider { project.zipTree(mod.obfJarPath.asFile(project)) })
         }
     }
 }
