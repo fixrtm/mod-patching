@@ -1,0 +1,92 @@
+name: Master Ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch: { }
+
+jobs:
+  build:
+    name: (Cross) Build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macOS: no cross on macOS
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          # waiting for approval 
+          # - target: aarch64-apple-darwin
+          #   os: macos-11
+          # windows: with cross on ubuntu
+          - target: aarch64-pc-windows-msvc
+            os: windows-latest
+          - target: i686-pc-windows-msvc
+            os: windows-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+          # linux: with cross on ubuntu
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+          - target: armv7-unknown-linux-musleabihf
+            os: ubuntu-latest
+          - target: i686-unknown-linux-musl
+            os: ubuntu-latest
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          target: ${{ matrix.target }}
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '8'
+
+      - uses: Swatinem/rust-cache@v1
+        with:
+          target-dir: cli-tool/build/cargo
+
+      - name: setup variables
+        id: vars
+        shell: bash
+        run: |
+          # if target is windows, extension is exe
+          if [[ "${{ matrix.target }}" == *"windows"* ]]; then
+            echo '::set-output name=ext::.exe'
+          else
+            echo '::set-output name=ext::'
+          fi
+          # if linux, use cross but not for other platforms
+          if [[ "$(uname -srm)" == *"Linux"* ]]; then
+            echo '::set-output name=cross::true'
+          else
+            echo '::set-output name=cross::false'
+          fi
+
+      - name: Install Cross
+        run: cargo install cross
+        if: ${{ fromJson(steps.vars.outputs.cross) }}
+      - name: Build
+        env:
+          RUSTFLAGS: -C target-feature=+crt-static
+        run: |
+          ./gradlew cli-tool:assemble -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: mod-patching-${{ matrix.target }}
+          path: cli-tool/build/cargo/${{ matrix.target }}/release/mod-patching${{ steps.vars.outputs.ext }}
