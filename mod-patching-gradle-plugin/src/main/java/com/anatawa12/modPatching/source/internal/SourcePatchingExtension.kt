@@ -15,7 +15,7 @@ class SourcePatchingExtension(private val project: Project) :
     override lateinit var mcVersion: String
     override lateinit var forgeFlowerVersion: String
     val mappingChannel get() = mappingName.substringBefore('_')
-    val mappingVersion get() = mappingName.substringAfter('-')
+    val mappingVersion get() = mappingName.substringAfter('_')
 
     override fun patch(mod: DownloadingMod, block: Action<ModPatch>): ModPatch {
         require(mod is AbstractDownloadingMod) { "unsupported DownloadingMod: $mod" }
