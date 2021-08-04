@@ -8,6 +8,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
+import java.util.function.Supplier
 
 open class CheckSignatureModification : DefaultTask() {
     @InputFiles
@@ -25,17 +26,17 @@ open class CheckSignatureModification : DefaultTask() {
             val base = baseClasses.get().flatten(project).toMap()
             val modified = modifiedClasses.get().flatten(project).toMap()
             check(
-                base = base.asSequence().map { it.toPair() },
-                modifiedGetter = { modified[it]?.invoke() },
+                base = base.asSequence()::iterator,
+                modifiedGetter = { modified[it]?.get() },
                 rootPackage = rootPackage.get(),
             )
             printDifferences(project.logger)
         }
     }
 
-    private fun FileTree.toMap(): Map<String, () -> ByteArray> {
-        val files = mutableMapOf<String, () -> ByteArray>()
-        visit { files[path] = { file.readBytes() } }
+    private fun FileTree.toMap(): Map<String, Supplier<ByteArray>> {
+        val files = mutableMapOf<String, Supplier<ByteArray>>()
+        visit { files[path] = Supplier { file.readBytes() } }
         return files
     }
 }

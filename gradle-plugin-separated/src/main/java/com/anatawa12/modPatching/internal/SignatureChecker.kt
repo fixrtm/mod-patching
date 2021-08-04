@@ -4,15 +4,21 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.ClassNode
 import org.slf4j.Logger
 import java.lang.reflect.Modifier
+import java.util.function.Function
+import java.util.function.Supplier
 
 class SignatureChecker {
     private val differences = mutableListOf<Difference>()
 
+    // this uses java.util.function.* because
+    // kotlin types can't be used to be called by 'gradle-plugin' project
     fun check(
-        base: Sequence<Pair<String, () -> ByteArray>>,
-        modifiedGetter: (String) -> ByteArray?,
+        base: Supplier<Iterator<Map.Entry<String, Supplier<ByteArray>>>>,
+        modifiedGetter: Function<String, ByteArray?>,
         rootPackage: String,
     ) {
+        @Suppress("NAME_SHADOWING")
+        val base = Sequence { base.get() }
         val rootPackagePath = rootPackage.replace('.', '/')
         differences.clear()
 
@@ -20,9 +26,9 @@ class SignatureChecker {
             if (!path.endsWith(".class")) return@forEach
             if (!path.startsWith(rootPackagePath)) return@forEach
 
-            val modifiedFile = modifiedGetter(path) ?: return@forEach
+            val modifiedFile = modifiedGetter.apply(path) ?: return@forEach
 
-            val baseClass = readClass(bytesGetter())
+            val baseClass = readClass(bytesGetter.get())
             val modifiedClass = readClass(modifiedFile)
 
             checkClass(path.removeSuffix(".class"), baseClass, modifiedClass)
