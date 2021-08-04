@@ -1,6 +1,5 @@
 package com.anatawa12.modPatching.internal
 
-import kotlinx.serialization.json.Json
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.CloseableHttpClient
 import java.io.IOException
