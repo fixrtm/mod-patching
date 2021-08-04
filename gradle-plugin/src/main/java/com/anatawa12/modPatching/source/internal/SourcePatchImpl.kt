@@ -63,6 +63,9 @@ class SourcePatchImpl(
             dependsOn(deobfTaskName, mod.downloadTaskName)
             classpath = project.configurations.getByName(FORGEFLOWER_CONFIGURATION)
 
+            inputs.file(deobfJarPath.asFile(project))
+            outputs.file(sourcesJarPath.asFile(project))
+
             args(
                 "-din=1",
                 "-rbr=1",
