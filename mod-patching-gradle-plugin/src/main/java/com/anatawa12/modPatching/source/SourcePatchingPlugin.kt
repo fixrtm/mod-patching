@@ -1,7 +1,7 @@
 package com.anatawa12.modPatching.source
 
 import com.anatawa12.modPatching.common.ModPatchingCommonPlugin
-import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_MODS
+import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_PATCHING_ENVIRONMENT
 import com.anatawa12.modPatching.internal.PatchingDir
 import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILE_MODS
 import com.anatawa12.modPatching.source.internal.SourceConstants.FORGEFLOWER_CONFIGURATION
@@ -48,10 +48,7 @@ open class SourcePatchingPlugin : Plugin<Project> {
 
         // TODO: install patching-mod
 
-        val prepareMods = project.tasks.getByName(PREPARE_MODS)
-        project.tasks.maybeCreate("preparePatchingEnvironment").apply {
-            group = "patching"
-            dependsOn(prepareMods)
+        project.tasks.getByName(PREPARE_PATCHING_ENVIRONMENT).apply {
             dependsOn(decompileMods)
         }
 

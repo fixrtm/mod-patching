@@ -10,7 +10,6 @@ import com.anatawa12.modPatching.binary.internal.BinaryPatchImpl
 import com.anatawa12.modPatching.binary.internal.BinaryPatchingExtension
 import com.anatawa12.modPatching.binary.internal.Util
 import com.anatawa12.modPatching.common.ModPatchingCommonPlugin
-import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_MODS
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
@@ -30,12 +29,6 @@ open class BinaryPatchingPlugin : Plugin<Project> {
         val patches = BinaryPatchingExtension(project)
         project.extensions.add(BinaryPatchContainer::class.java, "binPatching", patches)
         patches.all { (this as? BinaryPatchImpl)?.onAdd() }
-
-        val prepareMods = project.tasks.getByName(PREPARE_MODS)
-        project.tasks.maybeCreate("preparePatchingEnvironment").apply {
-            group = "patching"
-            dependsOn(prepareMods)
-        }
 
         generateBuildProcess(project, patches)
     }

@@ -3,6 +3,7 @@ package com.anatawa12.modPatching.common
 import com.anatawa12.modPatching.common.internal.AbstractDownloadingMod
 import com.anatawa12.modPatching.common.internal.CommonConstants.DOWNLOAD_MODS
 import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_MODS
+import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_PATCHING_ENVIRONMENT
 import com.anatawa12.modPatching.common.internal.ModsExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -16,7 +17,12 @@ open class ModPatchingCommonPlugin : Plugin<Project> {
 
         // phase task
         val downloadMods = project.tasks.create(DOWNLOAD_MODS)
+        downloadMods.group = "patching"
         val prepareMods = project.tasks.create(PREPARE_MODS)
         prepareMods.dependsOn(downloadMods)
+        prepareMods.group = "patching"
+        val prepareEnvironment = project.tasks.create(PREPARE_PATCHING_ENVIRONMENT)
+        prepareEnvironment.dependsOn(prepareMods)
+        prepareEnvironment.group = "patching"
     }
 }
