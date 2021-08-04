@@ -71,7 +71,7 @@ class SourcePatchImpl(
                 "-rsy=1",
                 "-iec=1",
                 "-jvn=1",
-                "-log=TRACE",
+                "-log=WARN",
                 deobfJarPath.asFile(project),
                 sourcesJarPath.asFile(project),
             )
