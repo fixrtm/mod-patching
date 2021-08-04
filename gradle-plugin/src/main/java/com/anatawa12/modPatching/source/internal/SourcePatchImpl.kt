@@ -72,8 +72,8 @@ class SourcePatchImpl(
                 "-iec=1",
                 "-jvn=1",
                 "-log=TRACE",
-                deobfJarPath,
-                sourcesJarPath,
+                deobfJarPath.asFile(project),
+                sourcesJarPath.asFile(project),
             )
         }
         project.tasks.getByName(DECOMPILE_MODS).dependsOn(decompileTask)
