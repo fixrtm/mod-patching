@@ -26,7 +26,7 @@ dependencies {
     // libraries which I'll use: on classpath
     shadow("org.apache.httpcomponents:httpclient:4.5.13")
     shadow("org.ow2.asm:asm:6.1")
-    shadow("org.ow2.asm:asm-commons:6.1")
+    shadow("org.ow2.asm:asm-commons:9.2")
     shadow("org.ow2.asm:asm-tree:6.1")
     shadow("org.snakeyaml:snakeyaml-engine:2.3")
     //shadow("org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.2")
