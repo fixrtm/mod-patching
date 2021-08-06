@@ -13,15 +13,15 @@ val cargoProj = cargo.projects.create("native") {
 val target = findProperty("cli-tool-target")?.toString()
     ?: cargoProj.toolChain.get().getDefaultTarget()
 val useCross = findProperty("cli-tool-cross").toString().toBoolean()
-val cargoTask = cargoProj.targets.create(target) {
+val cargoTarget = cargoProj.targets.create(target) {
     if (useCross) {
         toolChain.set(CargoToolChain.cross)
     }
 }
 
 publishing.publications.create<MavenPublication>("maven") {
-    artifact(cargoTask.binaryFile) {
-        builtBy(cargoTask)
+    artifact(cargoTarget.binaryFile) {
+        builtBy(cargoTarget.build)
         classifier = target
         extension = "exe"
     }

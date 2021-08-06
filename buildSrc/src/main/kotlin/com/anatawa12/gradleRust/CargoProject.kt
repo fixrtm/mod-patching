@@ -44,25 +44,15 @@ class CargoProject(
         project.tasks["assemble"].dependsOn(this)
     }
 
-    val targets = project.objects.domainObjectContainer(CargoBuildTask::class) {
-        project.tasks.create(buildTaskName(it), CargoBuildTask::class) {
-            val project = this@CargoProject
-            target.set(it)
-            toolChain.set(project.toolChain)
-            projectDir.set(project.projectDir)
-            destinationDir.set(project.destinationDir)
-            targetName.set(project.targetName)
-            releaseBuild.set(project.releaseBuild)
-            buildTask.dependsOn(this)
-            extendsFrom(project)
-            dependsOn(dependencyTasks)
-        }
+    val testTask = project.tasks.create(GUtil.toLowerCamelCase("test cargo $name"), Task::class) {
+        project.tasks["check"].dependsOn(this)
     }
 
-    private fun buildTaskName(targetName: String): String =
-        GUtil.toLowerCamelCase("build cargo $name for ${targetName.replace('-', ' ')}")
+    val targets = project.objects.domainObjectContainer(CargoBuildTarget::class) {
+        CargoBuildTarget(project, this, it)
+    }
 
-    fun targets(block: Action<NamedDomainObjectContainer<CargoBuildTask>>) {
+    fun targets(block: Action<NamedDomainObjectContainer<CargoBuildTarget>>) {
         block.execute(targets)
     }
 

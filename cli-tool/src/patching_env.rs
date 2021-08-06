@@ -1,14 +1,17 @@
-use crate::ext::*;
-use quick_error::quick_error;
-use rayon::prelude::*;
-use serde::de::DeserializeOwned;
-use serde::{Deserialize, Serialize};
-use serde_yaml::{from_reader, to_writer};
 use std::collections::{BTreeMap, BTreeSet};
 use std::env::current_dir;
 use std::fs::File;
 use std::path::{Path, PathBuf};
+
+use quick_error::quick_error;
+use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
+use serde::de::DeserializeOwned;
+use serde_yaml::{from_reader, to_writer};
 use zip::ZipArchive;
+
+use crate::ext::*;
+use crate::types::{RelativePathFromCacheRoot, RelativePathFromProjectRoot};
 
 #[derive(Debug)]
 pub struct PatchingEnv {
@@ -113,17 +116,17 @@ struct PatchingMainConfig {
 struct ModInfo {
     // relative from pathing mod root
     #[serde(rename = "patch-path")]
-    patch_path: PathBuf,
+    patch_path: RelativePathFromProjectRoot,
     #[serde(rename = "source-path")]
-    source_path: PathBuf,
+    source_path: RelativePathFromProjectRoot,
     #[serde(rename = "unmodifieds-jar")]
-    unmodifieds_jar: PathBuf,
+    unmodifieds_jar: RelativePathFromProjectRoot,
 
     // relative from pathing cache root
     #[serde(rename = "source-jar")]
-    source_jar: PathBuf,
+    source_jar: RelativePathFromCacheRoot,
     #[serde(rename = "deobf-jar")]
-    deobf_jar: PathBuf,
+    deobf_jar: RelativePathFromCacheRoot,
 
     // list of class names
     #[serde(rename = "changed-classes")]

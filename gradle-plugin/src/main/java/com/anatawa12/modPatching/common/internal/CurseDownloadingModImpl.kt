@@ -17,7 +17,7 @@ class CurseDownloadingModImpl(project: Project) : AbstractDownloadingMod(project
 
     override val nameDefault: String get() = id
 
-    override val cacheBaseDir get() = RelativePathFromCacheRoot("curse/$id/$version")
+    override val cacheBaseDir get() = RelativePathFromCacheRoot.of("curse/$id/$version")
     override val cacheBaseName get() = "$id-$version"
     override val modGlobalIdentifier get() = "curse-$id-$version"
     override fun configureDownloadingTask(dest: RelativePathFromCacheRoot): Task {

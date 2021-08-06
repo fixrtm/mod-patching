@@ -273,6 +273,7 @@ dependencies = [
  "quick-error",
  "rayon",
  "serde",
+ "serde_test",
  "serde_yaml",
  "tempfile",
  "zip",
@@ -465,6 +466,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "serde_test"
+version = "1.0.127"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de9e52f2f83e2608a121618b6d3885b514613aac702306232c4f035ff60fdb56"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

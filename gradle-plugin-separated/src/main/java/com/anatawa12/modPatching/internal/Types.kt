@@ -10,10 +10,13 @@ import kotlinx.serialization.encoding.Encoder
 
 @JvmInline
 @Serializable(with = RelativePathFromCacheRoot.Serializer::class)
-value class RelativePathFromCacheRoot(private val path: String) {
+value class RelativePathFromCacheRoot private constructor(private val path: String) {
     override fun toString(): String = path
 
-    fun join(relative: String) = RelativePathFromCacheRoot("$path/$relative")
+    fun join(relative: String): RelativePathFromCacheRoot {
+        require(checkPath(path)) { "invalid relative path" }
+        return RelativePathFromCacheRoot("$path/$relative")
+    }
 
     object Serializer : KSerializer<RelativePathFromCacheRoot> {
         override val descriptor: SerialDescriptor =
@@ -24,17 +27,27 @@ value class RelativePathFromCacheRoot(private val path: String) {
         }
 
         override fun deserialize(decoder: Decoder): RelativePathFromCacheRoot {
-            return RelativePathFromCacheRoot(decoder.decodeString())
+            return of(decoder.decodeString())
+        }
+    }
+
+    companion object {
+        fun of(path: String): RelativePathFromCacheRoot {
+            require(checkPath(path)) { "invalid path" }
+            return RelativePathFromCacheRoot(path)
         }
     }
 }
 
 @JvmInline
 @Serializable(with = RelativePathFromProjectRoot.Serializer::class)
-value class RelativePathFromProjectRoot(private val path: String) {
+value class RelativePathFromProjectRoot private constructor(private val path: String) {
     override fun toString(): String = path
 
-    fun join(relative: String) = RelativePathFromProjectRoot("$path/$relative")
+    fun join(relative: String): RelativePathFromProjectRoot {
+        require(checkPath(path)) { "invalid relative path" }
+        return RelativePathFromProjectRoot("$path/$relative")
+    }
 
     object Serializer : KSerializer<RelativePathFromProjectRoot> {
         override val descriptor: SerialDescriptor =
@@ -45,7 +58,26 @@ value class RelativePathFromProjectRoot(private val path: String) {
         }
 
         override fun deserialize(decoder: Decoder): RelativePathFromProjectRoot {
-            return RelativePathFromProjectRoot(decoder.decodeString())
+            return of(decoder.decodeString())
         }
     }
+
+    companion object {
+        fun of(path: String): RelativePathFromProjectRoot {
+            require(checkPath(path)) { "invalid path" }
+            return RelativePathFromProjectRoot(path)
+        }
+    }
+}
+
+private fun checkPath(path: String): Boolean {
+    if (path == "") return false
+
+    for (component in path.split('/')) {
+        if (component == "") return false
+        if (component == ".") return false
+        if (component.any { it in "<>:\"\\/|?:" && it in '\u0000'..'\u001f' })
+            return false
+    }
+    return true
 }
