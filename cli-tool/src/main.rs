@@ -19,6 +19,7 @@ mod doing_error;
 mod ext;
 mod patching_env;
 mod select;
+mod types;
 
 macro_rules! execution {
     ($expr: expr => |$name: ident| $els: expr) => {
