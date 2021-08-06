@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() }}
     needs:
-      - test-with-example
+      - build
     steps:
       - name: Conclude Tests
         env: { NEEDS: "${{ toJSON(needs) }}" }
