@@ -29,8 +29,8 @@ class SourcePatchImpl(
 
     @FrozenByFreeze(of = "mod")
     val sourcesJarPath by lazy { getMcpJarPath("deobf-${extension.forgeFlowerVersion}-sources") }
-    val srcDirPath by lazy { RelativePathFromProjectRoot("src/main/$sourceTreeName") }
-    val patchDirPath by lazy { RelativePathFromProjectRoot("src/main/$sourceTreeName-patches") }
+    val srcDirPath by lazy { RelativePathFromProjectRoot.of("src/main/$sourceTreeName") }
+    val patchDirPath by lazy { RelativePathFromProjectRoot.of("src/main/$sourceTreeName-patches") }
 
     @FrozenByFreeze(of = "mod")
     fun getMcpJarPath(classifier: String): RelativePathFromCacheRoot {
@@ -81,7 +81,7 @@ class SourcePatchImpl(
         }
         project.tasks.getByName(DECOMPILE_MODS).dependsOn(decompileTask)
 
-        val buildDir = RelativePathFromProjectRoot(project.buildDir.relativeTo(project.projectDir).path)
+        val buildDir = RelativePathFromProjectRoot.of(project.buildDir.relativeTo(project.projectDir).path)
             .join("patching-mod/mods/$name")
 
         val unmodifiedsJarPath = buildDir.join("${mod.cacheBaseName}-unmodifieds.jar")
