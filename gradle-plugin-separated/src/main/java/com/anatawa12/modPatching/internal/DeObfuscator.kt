@@ -2,7 +2,6 @@ package com.anatawa12.modPatching.internal
 
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.commons.ClassRemapper
 import org.objectweb.asm.commons.Remapper
 import java.io.File
 import java.util.zip.ZipEntry
@@ -33,7 +32,7 @@ object DeObfuscator {
                         // it's class file: remap
                         val cr = ClassReader(zis.readBytes())
                         val cw = ClassWriter(0)
-                        cr.accept(ClassRemapper(cw, remapper), 0)
+                        cr.accept(LambdaSupportedClassRemapper(cw, remapper), 0)
                         zos.putNextEntry(ZipEntry(entry.name).apply {
                             size = 0
                             crc = 0
