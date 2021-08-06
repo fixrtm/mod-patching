@@ -6,6 +6,7 @@ use serde::de;
 
 macro_rules! relative_path_definition {
     ($name: ident) => {
+        #[derive(Debug)]
         pub(crate) struct $name(PathBuf);
 
         impl<'de> Deserialize<'de> for $name {
@@ -32,7 +33,7 @@ macro_rules! relative_path_definition {
                         } else {
                             Err(E::invalid_value(
                                 de::Unexpected::Str(v),
-                                "slash separated relative path",
+                                &"slash separated relative path",
                             ))
                         }
                     }
@@ -43,7 +44,7 @@ macro_rules! relative_path_definition {
         }
 
         impl Serialize for $name {
-            fn serialize<S>(&self, serializer: S) -> Result<Ok, S::Error>
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: Serializer,
             {
@@ -92,6 +93,7 @@ fn check_path_str(path: &str) -> bool {
         }
         if component
             .as_bytes()
+            .iter()
             .any(|it| b"<>:\"\\/|?:".contains(&it) && (b'\x00'..b'\x1f').contains(&it))
         {
             return false;
