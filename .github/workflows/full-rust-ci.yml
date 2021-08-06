@@ -85,6 +85,7 @@ jobs:
           RUSTFLAGS: -C target-feature=+crt-static
         run: |
           ./gradlew cli-tool:assemble -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
+          ./gradlew cli-tool:test -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
 
       - uses: actions/upload-artifact@v2
         with:
