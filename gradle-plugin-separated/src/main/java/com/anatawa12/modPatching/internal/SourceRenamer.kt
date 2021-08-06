@@ -18,7 +18,8 @@ object SourceRenamer {
         }
     }
 
-    private class Visitor(cv: ClassVisitor, val suffix: String) : ClassVisitor(Opcodes.ASM6, cv) {
+    private class Visitor(cv: ClassVisitor, val suffix: String) :
+        ClassVisitor(ASMVersions.getLatestInRange(Opcodes.ASM4, Opcodes.ASM9), cv) {
         override fun visitSource(source: String?, debug: String?) {
             super.visitSource(source?.plus(suffix), debug)
         }
