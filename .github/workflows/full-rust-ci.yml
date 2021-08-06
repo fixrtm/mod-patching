@@ -90,3 +90,15 @@ jobs:
         with:
           name: mod-patching-${{ matrix.target }}
           path: cli-tool/build/cargo/${{ matrix.target }}/release/mod-patching${{ steps.vars.outputs.ext }}
+
+  conclude:
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs:
+      - test-with-example
+    steps:
+      - name: Conclude Tests
+        env: { NEEDS: "${{ toJSON(needs) }}" }
+        run: |
+          echo "$NEEDS" | jq -c '. | to_entries[] | [.key, .value.result]'
+          echo "$NEEDS" | jq -e '. | all(.result == "success")' > /dev/null
