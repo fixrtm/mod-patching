@@ -6,7 +6,7 @@ use serde::de;
 
 macro_rules! relative_path_definition {
     ($name: ident) => {
-        #[derive(Debug)]
+        #[derive(Debug, PartialEq)]
         pub(crate) struct $name(PathBuf);
 
         impl<'de> Deserialize<'de> for $name {
@@ -106,4 +106,25 @@ fn check_path(path: &Path) -> bool {
     return path
         .components()
         .all(|x| matches!(x, Component::ParentDir | Component::Normal(_)));
+}
+
+#[cfg(test)]
+mod test {
+    use serde_test::*;
+
+    use super::*;
+
+    #[test]
+    fn from_cache_root_serialize_deserialize() {
+        assert_tokens(&RelativePathFromCacheRoot("curse/realtrainmod/2.4.22/realtrainmod-2.4.22-stable-39-deobf-1.5.498.12-sources.jar".into()), &[
+            Token::Str("curse/realtrainmod/2.4.22/realtrainmod-2.4.22-stable-39-deobf-1.5.498.12-sources.jar"),
+        ])
+    }
+
+    #[test]
+    fn from_project_root_serialize_deserialize() {
+        assert_tokens(&RelativePathFromProjectRoot("build/patching-mod/mods/rtm/realtrainmod-2.4.22-unmodifieds.jar".into()), &[
+            Token::Str("build/patching-mod/mods/rtm/realtrainmod-2.4.22-unmodifieds.jar"),
+        ])
+    }
 }
