@@ -19,25 +19,34 @@ jobs:
           # macOS: no cross on macOS
           - target: x86_64-apple-darwin
             os: macos-latest
+            test: true
           # waiting for approval 
           # - target: aarch64-apple-darwin
           #   os: macos-11
+          #   test: true
           # windows: with cross on ubuntu
           - target: aarch64-pc-windows-msvc
             os: windows-latest
+            test: false
           - target: i686-pc-windows-msvc
             os: windows-latest
+            test: true
           - target: x86_64-pc-windows-msvc
             os: windows-latest
+            test: true
           # linux: with cross on ubuntu
           - target: aarch64-unknown-linux-musl
             os: ubuntu-latest
+            test: true
           - target: armv7-unknown-linux-musleabihf
             os: ubuntu-latest
+            test: true
           - target: i686-unknown-linux-musl
             os: ubuntu-latest
+            test: true
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
+            test: true
 
     runs-on: ${{ matrix.os }}
 
@@ -83,9 +92,12 @@ jobs:
       - name: Build
         env:
           RUSTFLAGS: -C target-feature=+crt-static
-        run: |
-          ./gradlew cli-tool:assemble -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
-          ./gradlew cli-tool:check -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
+        run: ./gradlew cli-tool:assemble -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
+      - name: Test
+        if: ${{ matrix.test }}
+        env:
+          RUSTFLAGS: -C target-feature=+crt-static
+        run: ./gradlew cli-tool:check -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
 
       - uses: actions/upload-artifact@v2
         with:
