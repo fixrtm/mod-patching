@@ -20,9 +20,9 @@ open class InstallSourcePatchingUtil : DefaultTask() {
 
     private fun filePath(dest: Directory, pre: String, command: String): RegularFile {
         return if (pre == "")
-            dest.file("$command${OperatingSystem.current.extension}")
+            dest.file("$command${OperatingSystem.current!!.extension}")
         else
-            dest.file("$pre.$command${OperatingSystem.current.extension}")
+            dest.file("$pre.$command${OperatingSystem.current!!.extension}")
     }
 
     @get:OutputFile
