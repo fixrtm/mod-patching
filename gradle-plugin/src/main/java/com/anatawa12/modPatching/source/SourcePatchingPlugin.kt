@@ -118,9 +118,16 @@ open class SourcePatchingPlugin : Plugin<Project> {
         )
 
         private fun computeCurrentTargetTriple(): String {
-            return targetTriples[OperatingSystem.current to Architecture.current]
-                ?: error("${OperatingSystem.current} on ${Architecture.current} is not (yet) supported!" +
+            val operatingSystem = OperatingSystem.current ?: inferenceError()
+            val architecture = Architecture.current ?: inferenceError()
+            return targetTriples[operatingSystem to architecture]
+                ?: error("$operatingSystem on $architecture is not (yet) supported!" +
                         "please make issue on https://github.com/anatawa12/mod-patching/issues")
+        }
+
+        private fun inferenceError(): Nothing {
+            error("OS or Arch inference failed! Is your OS one of MacOS, Windows, or Linux? " +
+                    "If so, please make issue on https://github.com/anatawa12/mod-patching/issues")
         }
     }
 }

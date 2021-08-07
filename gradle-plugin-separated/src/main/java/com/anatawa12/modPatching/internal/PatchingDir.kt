@@ -1,9 +1,16 @@
 package com.anatawa12.modPatching.internal
 
 import com.charleskorn.kaml.Yaml
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import java.io.File
+import java.util.*
+import java.util.function.Consumer
 
 private const val PATCHING_DIR_NAME = ".patching-mods"
 
@@ -20,11 +27,12 @@ class PatchingDir private constructor(val root: File) {
             .let { Yaml.default.decodeFromString(PatchingMainConfig.serializer(), it) }
     }
 
-    fun save() {
+    fun save(yamlFormatter: Consumer<File>) {
         try {
             root.resolve("local.yaml").writeText(Yaml.default.encodeToString(LocalConfig.serializer(), local))
             root.resolve("main.yaml").writeText(Yaml.default.encodeToString(PatchingMainConfig.serializer(), main))
             root.resolve(".gitignore").writeText("local.yaml\n.gitignore\n")
+            yamlFormatter.accept(root.resolve("main.yaml"))
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -37,7 +45,8 @@ class PatchingDir private constructor(val root: File) {
 
 @Serializable
 class PatchingMainConfig {
-    val mods = mutableMapOf<String, ModInfo>()
+    @Serializable(SortedMapSerializer::class)
+    val mods: SortedMap<String, ModInfo> = TreeMap()
 }
 
 @Serializable
@@ -84,3 +93,18 @@ data class LocalConfig(
     @SerialName("cache-base")
     val cache_base: String,
 )
+
+class SortedMapSerializer<K, V>(kSerializer: KSerializer<K>, vSerializer: KSerializer<V>) :
+    KSerializer<SortedMap<K, V>> {
+    private val mapSerializer = MapSerializer(kSerializer, vSerializer)
+
+    override val descriptor: SerialDescriptor get() = mapSerializer.descriptor
+
+    override fun serialize(encoder: Encoder, value: SortedMap<K, V>) {
+        mapSerializer.serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): SortedMap<K, V> {
+        return mapSerializer.deserialize(decoder).toMap(TreeMap())
+    }
+}

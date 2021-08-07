@@ -18,7 +18,7 @@ enum class OperatingSystem(val extension: String) {
             } else if (osName.startsWith("Darwin")) {
                 MACOS
             } else {
-                throw LinkageError("Unknown platform: $osName")
+                null
             }
         }
     }

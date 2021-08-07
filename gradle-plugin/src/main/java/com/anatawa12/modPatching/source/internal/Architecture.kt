@@ -15,7 +15,7 @@ enum class Architecture {
     ;
 
     companion object {
-        val current by lazy {
+        val current: Architecture? by lazy {
             val osArch = System.getProperty("os.arch")
 
             when {

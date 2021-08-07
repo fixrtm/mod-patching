@@ -97,6 +97,6 @@ class SourcePatchImpl(
             sourceJar = sourcesJarPath,
             deobfJar = deobfJarPath,
         )
-        patchingDir.save()
+        patchingDir.save(yamlReformat(project))
     }
 }
