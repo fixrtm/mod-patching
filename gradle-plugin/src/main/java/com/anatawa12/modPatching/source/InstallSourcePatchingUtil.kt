@@ -7,8 +7,14 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.property
+import java.io.File
+import java.nio.file.Files
 
 open class InstallSourcePatchingUtil : DefaultTask() {
+    @Input
+    val installingType = project.objects.property(InstallingType::class)
+        .convention(project.provider { InstallingType.default })
+
     @Input
     val prefix = project.objects.property(String::class).convention("")
 
@@ -39,15 +45,27 @@ open class InstallSourcePatchingUtil : DefaultTask() {
 
     @TaskAction
     fun install() {
-        val command = command.get().singleFile
-        val addModifyFile = addModifyFile.get().asFile
-        val applyPatchesFile = applyPatchesFile.get().asFile
-        val createDiffFile = createDiffFile.get().asFile
-        command.copyTo(addModifyFile, overwrite = true)
-        command.copyTo(applyPatchesFile, overwrite = true)
-        command.copyTo(createDiffFile, overwrite = true)
+        val command = command.get().singleFile.absoluteFile
+        val addModifyFile = addModifyFile.get().asFile.absoluteFile
+        val applyPatchesFile = applyPatchesFile.get().asFile.absoluteFile
+        val createDiffFile = createDiffFile.get().asFile.absoluteFile
+        val installer: (File, File) -> Unit = when (installingType.get()) {
+            InstallingType.Symlink -> ::installViaSymlink
+            InstallingType.Copying -> ::installViaCopy
+        }
+        installer(command, addModifyFile)
+        installer(command, applyPatchesFile)
+        installer(command, createDiffFile)
         addModifyFile.setExecutable(true)
         applyPatchesFile.setExecutable(true)
         createDiffFile.setExecutable(true)
+    }
+
+    private fun installViaSymlink(from: File, to: File) {
+        Files.createSymbolicLink(from.toPath(), to.toPath())
+    }
+
+    private fun installViaCopy(from: File, to: File) {
+        from.copyTo(to, overwrite = true)
     }
 }
