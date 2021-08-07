@@ -15,7 +15,8 @@ enum class InstallingType {
                 OperatingSystem.MACOS -> Symlink
                 // on Windows, symlink doesn't work well
                 OperatingSystem.WINDOWS -> Copying
-                // for safety, use copy
+                // symlink may not work well on some platforms like windows
+                // so use copy by default.
                 null -> Copying
             }
         }
