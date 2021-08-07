@@ -62,7 +62,8 @@ open class InstallSourcePatchingUtil : DefaultTask() {
     }
 
     private fun installViaSymlink(from: File, to: File) {
-        Files.createSymbolicLink(from.toPath(), to.toPath())
+        to.delete()
+        Files.createSymbolicLink(to.toPath(), from.toPath())
     }
 
     private fun installViaCopy(from: File, to: File) {
