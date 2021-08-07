@@ -275,6 +275,7 @@ dependencies = [
  "serde",
  "serde_yaml",
  "tempfile",
+ "yaml-rust",
  "zip",
 ]
 
