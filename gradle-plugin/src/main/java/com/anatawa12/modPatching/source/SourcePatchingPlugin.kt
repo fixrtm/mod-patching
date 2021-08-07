@@ -94,7 +94,8 @@ open class SourcePatchingPlugin : Plugin<Project> {
             }
             val noIgnoreWarn = project.providers
                 .gradleProperty("com.anatawa12.mod-patching.no-ignore-warn")
-                .forUseAtConfigurationTime().get().equals("true", ignoreCase = true)
+                .forUseAtConfigurationTime().orNull
+                .equals("true", ignoreCase = true)
             if (!noIgnoreWarn) {
                 val gitignore = projectDir.resolve(".gitignore").readTextOr("")
                 val prefix = installSourceUtilLocally.prefix.get()
