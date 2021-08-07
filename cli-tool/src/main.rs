@@ -34,6 +34,29 @@ macro_rules! execution {
     };
 }
 
+fn match_until(x: char) -> impl FnMut(char) -> bool {
+    let mut finished = false;
+    return move |c| {
+        if finished {
+            false
+        } else if c == x {
+            finished = true;
+            true
+        } else {
+            true
+        }
+    };
+}
+
+#[test]
+fn match_until_test() {
+    let mut f = match_until('.');
+    assert_eq!(f('a'), true);
+    assert_eq!(f('.'), true);
+    assert_eq!(f('a'), false);
+    assert_eq!("a.b".trim_start_matches(match_until('.')), "b")
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = args();
     let my_name = args.next().expect("no executable name");
@@ -42,7 +65,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap()
         .to_str()
         .unwrap()
-        .trim_start_matches("pm.");
+        .trim_end_matches(".exe")
+        .trim_start_matches(match_until('.'));
     execution!(my_name, args => |_name| ());
 
     execution!(args.next().expect("no executable name").as_str(), args => |name| {
