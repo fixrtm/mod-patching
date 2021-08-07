@@ -89,9 +89,33 @@ open class SourcePatchingPlugin : Plugin<Project> {
 
         project.afterEvaluate {
             val logger = project.logger
-            if (!projectDir.resolve(".gitignore").readTextOr("").lineSequence().any { it == "pm.*" || it == "/pm.*" }) {
-                logger.warn("pm.* is not git ignored! generated patching mod utility should be ignored because " +
-                        "they're environment dependent.")
+            if (patches.autoInstallCli) {
+                installSourceUtilLocally.install()
+            }
+            val noIgnoreWarn = project.providers
+                .gradleProperty("com.anatawa12.mod-patching.no-ignore-warn")
+                .forUseAtConfigurationTime().get().equals("true", ignoreCase = true)
+            if (!noIgnoreWarn) {
+                val gitignore = projectDir.resolve(".gitignore").readTextOr("")
+                val prefix = installSourceUtilLocally.prefix.get()
+
+                val files: MutableSet<String>
+                val errors: String
+                if (prefix == "") {
+                    files = mutableSetOf("add-modify*", "apply-patches*", "create-diff*")
+                    errors = "add-modify*, apply-patches*, and create-diff* are"
+                } else {
+                    files = mutableSetOf("$prefix.*")
+                    errors = "$prefix.* is"
+                }
+
+                for (line in gitignore.lineSequence()) {
+                    files.removeIf { line == it || line == "/$it" }
+                }
+                if (files.isNotEmpty()) {
+                    logger.warn("$errors not git ignored! generated patching mod utility " +
+                            "should be ignored because they're environment dependent.")
+                }
             }
         }
     }
