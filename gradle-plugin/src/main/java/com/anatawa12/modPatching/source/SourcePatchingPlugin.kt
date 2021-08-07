@@ -89,6 +89,9 @@ open class SourcePatchingPlugin : Plugin<Project> {
 
         project.afterEvaluate {
             val logger = project.logger
+            if (patches.autoInstallCli) {
+                installSourceUtilLocally.install()
+            }
             if (!projectDir.resolve(".gitignore").readTextOr("").lineSequence().any { it == "pm.*" || it == "/pm.*" }) {
                 logger.warn("pm.* is not git ignored! generated patching mod utility should be ignored because " +
                         "they're environment dependent.")

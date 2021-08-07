@@ -11,6 +11,7 @@ interface SourcePatchContainer : NamedDomainObjectCollection<ModPatch> {
     var mappingName: String
     var mcVersion: String
     var forgeFlowerVersion: String
+    var autoInstallCli: Boolean
 
     fun patch(mod: DownloadingMod, block: Action<ModPatch>): ModPatch
     fun patch(mod: DownloadingMod, block: Closure<*>): ModPatch = patch(mod, ConfigureUtil.configureUsing(block))

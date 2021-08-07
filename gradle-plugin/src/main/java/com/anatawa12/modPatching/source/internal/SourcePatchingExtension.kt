@@ -14,6 +14,7 @@ class SourcePatchingExtension(private val project: Project) :
     override lateinit var mappingName: String
     override lateinit var mcVersion: String
     override lateinit var forgeFlowerVersion: String
+    override var autoInstallCli: Boolean = false
     val mappingChannel get() = mappingName.substringBefore('_')
     val mappingVersion get() = mappingName.substringAfter('_')
 
