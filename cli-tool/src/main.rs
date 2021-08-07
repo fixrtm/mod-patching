@@ -1,6 +1,6 @@
-use std::env::args;
+use std::env::{args, Args};
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::{BufReader, BufWriter, Read, Seek, Write};
 use std::path::Path;
 use std::result::Result;
 
@@ -19,13 +19,15 @@ mod doing_error;
 mod ext;
 mod patching_env;
 mod select;
+mod types;
 
 macro_rules! execution {
-    ($expr: expr => |$name: ident| $els: expr) => {
+    ($expr: expr, $args: expr => |$name: ident| $els: expr) => {
         match $expr {
             "add-modify" => return command_add_modify(),
             "apply-patches" => return command_apply_patches(),
             "create-diff" => return command_create_diff(),
+            "reformat-yaml" => return command_reformat_yaml($args),
             "--help" | "help" => return command_help(),
             $name => $els,
         }
@@ -65,9 +67,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap()
         .trim_end_matches(".exe")
         .trim_start_matches(match_until('.'));
-    execution!(my_name => |_name| ());
+    execution!(my_name, args => |_name| ());
 
-    execution!(args.next().expect("no executable name").as_str() => |name| {
+    execution!(args.next().expect("no executable name").as_str(), args => |name| {
         panic!("unknown execution: {}", name)
     })
 }
@@ -126,6 +128,77 @@ fn command_help() -> Result<(), Box<dyn std::error::Error>> {
     eprintln!("                     this drops all existing source.");
     eprintln!("    create-diff      creates patch file to commit");
     eprintln!("    help             show this message");
+    Ok(())
+}
+
+fn command_reformat_yaml(mut args: Args) -> Result<(), Box<dyn std::error::Error>> {
+    use std::fs::OpenOptions;
+    use std::io::SeekFrom;
+    use yaml_rust::{YamlEmitter, YamlLoader};
+
+    let file_path = args.next().expect("yaml file name expected");
+    let mut file = OpenOptions::new().read(true).write(true).open(file_path)?;
+
+    // read
+    let body = {
+        let mut reader = BufReader::new(&mut file);
+        let mut read = String::new();
+        reader.read_to_string(&mut read)?;
+        YamlLoader::load_from_str(&read)?
+    };
+
+    // reset
+    file.set_len(0)?;
+    file.seek(SeekFrom::Start(0))?;
+
+    // write
+    {
+        use std::fmt::Write as FmtWrite;
+        use std::{fmt, io};
+        type BoxedErr = Box<dyn std::error::Error>;
+
+        // bridge between fmt::write and io::Write
+        // with keeping error by io::Write
+        struct FmtToIoWriter<W> {
+            writer: W,
+            err: Option<BoxedErr>,
+        }
+
+        impl<W> fmt::Write for FmtToIoWriter<W>
+            where
+                W: io::Write,
+        {
+            fn write_str(&mut self, s: &str) -> fmt::Result {
+                match self.writer.write_all(s.as_bytes()) {
+                    Ok(_) => Ok(()),
+                    Err(err) => {
+                        self.err = Some(err.into());
+                        Err(fmt::Error)
+                    }
+                }
+            }
+        }
+
+        fn check_err<V, E, W>(err: Result<V, E>, w: &mut FmtToIoWriter<W>) -> Result<V, BoxedErr>
+            where
+                E: std::error::Error + 'static,
+        {
+            w.err
+                .take()
+                .map(Err)
+                .unwrap_or_else(|| err.map_err(Into::into))
+        }
+
+        let mut writer = FmtToIoWriter {
+            writer: BufWriter::new(&mut file),
+            err: None,
+        };
+        for x in &body {
+            check_err(YamlEmitter::new(&mut writer).dump(x), &mut writer)?;
+            check_err(writer.write_char('\n'), &mut writer)?;
+        }
+        writer.writer.flush()?;
+    }
     Ok(())
 }
 
