@@ -14,7 +14,7 @@ import com.anatawa12.modPatching.common.ModPatchingCommonPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.apply
@@ -43,7 +43,7 @@ open class BinaryPatchingPlugin : Plugin<Project> {
             newerJar.set(jarTask.archiveFile)
             modifiedInfoDir.set(Util.getBuildPath(project, "modified-infos"))
         }
-        val copyModifiedClasses = project.tasks.create(COPY_MODIFIED_CLASSES, Copy::class) {
+        val copyModifiedClasses = project.tasks.create(COPY_MODIFIED_CLASSES, Sync::class) {
             dependsOn(jarTask, listModifiedClasses)
             into(Util.getBuildPath(project, "modified"))
             from(jarTask.archiveFile) {
