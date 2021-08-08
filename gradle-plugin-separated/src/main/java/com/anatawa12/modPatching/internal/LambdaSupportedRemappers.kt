@@ -41,7 +41,7 @@ class LambdaSupportedMethodRemapper : MethodRemapper {
             },
             remapper.mapMethodDesc(descriptor),
             remapper.mapValue(bootstrapMethodHandle) as Handle,
-            Array(bootstrapMethodArguments.size) {
+            *Array(bootstrapMethodArguments.size) {
                 remapper.mapValue(bootstrapMethodArguments[it])
             },
         )
