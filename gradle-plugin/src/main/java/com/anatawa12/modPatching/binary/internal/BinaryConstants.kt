@@ -3,6 +3,9 @@ package com.anatawa12.modPatching.binary.internal
 import org.gradle.util.GUtil
 
 object BinaryConstants {
+    // list modified classes
+    val LIST_MODIFIED_CLASSES = GUtil.toLowerCamelCase("list modified classes")
+
     // Copies changed files to build/patching-mod/modified
     val COPY_MODIFIED_CLASSES = GUtil.toLowerCamelCase("copy modified classes")
 

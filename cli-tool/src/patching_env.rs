@@ -38,10 +38,14 @@ impl PatchingEnv {
 
     pub fn is_modified(&self, name: impl AsRef<str>) -> bool {
         let str = name.as_ref();
-        self.main
-            .mods
-            .values()
-            .any(|m| m.changed_classes.contains(str))
+        println!("test for {}", str);
+        outer_class_names(str).any(|x| {
+            println!(">test for {}", x);
+            self.main
+                .mods
+                .values()
+                .any(|m| m.changed_classes.contains(x))
+        })
     }
 
     pub fn is_modified_class_name(&self, name: impl AsRef<str>) -> bool {
@@ -98,6 +102,40 @@ impl PatchingEnv {
     pub fn get_source_jar_path(&self, name: impl AsRef<str>) -> PathBuf {
         self.local.cache_base.join(&self.get_mod(name).source_jar)
     }
+}
+
+// the class name will be returned
+struct OuterClassNames<'a>(Option<&'a str>);
+
+impl<'a> Iterator for OuterClassNames<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(str) = self.0 {
+            let dot = str.rfind('.').unwrap_or(0);
+            if let Some(dollar) = str.rfind('$') {
+                if dot < dollar {
+                    // abc.def$ghi -> abc.def
+                    // safety: rfind returns valid index
+                    self.0 = Some(unsafe { str.get_unchecked(0..dollar) })
+                } else {
+                    // abc$def.ghi -> None
+                    self.0 = None
+                }
+            } else {
+                // abc.def -> None
+                self.0 = None
+            }
+
+            Some(str)
+        } else {
+            None
+        }
+    }
+}
+
+fn outer_class_names<'a>(name: &'a str) -> OuterClassNames<'a> {
+    OuterClassNames(Some(name))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
