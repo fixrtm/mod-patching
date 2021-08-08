@@ -15,13 +15,13 @@ import java.util.zip.ZipFile
 
 open class ListModifiedClasses : DefaultTask() {
     @InputFiles
-    var oldJars = project.objects.fileCollection()
+    val oldJars = project.objects.fileCollection()
 
     @InputFile
-    var newerJar = project.objects.fileProperty()
+    val newerJar = project.objects.fileProperty()
 
     @OutputDirectory
-    var modifiedInfoDir = project.objects.directoryProperty()
+    val modifiedInfoDir = project.objects.directoryProperty()
 
     @TaskAction
     fun generate() {
