@@ -51,6 +51,11 @@ val pathingModSource by gradlePlugin.plugins.creating {
     id = "com.anatawa12.mod-patching.source"
 }
 
+val resourcesOnDev by gradlePlugin.plugins.creating {
+    implementationClass = "com.anatawa12.modPatching.resourcesDev.ResourcesDevPlugin"
+    id = "com.anatawa12.mod-patching.resources-dev"
+}
+
 publishing.publications.create<MavenPublication>("maven") {
     from(components["java"])
     configurePom {
