@@ -7,7 +7,6 @@ import com.anatawa12.modPatching.binary.internal.BinaryConstants.CHECK_SIGNATURE
 import com.anatawa12.modPatching.binary.internal.BinaryConstants.COPY_MODIFIED_CLASSES
 import com.anatawa12.modPatching.binary.internal.BinaryConstants.GENERATE_BSDIFF_PATCH
 import com.anatawa12.modPatching.common.internal.AbstractDownloadingMod
-import com.anatawa12.modPatching.common.internal.Delegates
 import com.anatawa12.modPatching.common.internal.FreezableContainer
 import com.anatawa12.modPatching.internal.asFile
 import org.gradle.api.file.FileTreeElement
@@ -20,7 +19,6 @@ import java.util.zip.ZipFile
 class BinaryPatchImpl(
     override val mod: AbstractDownloadingMod,
 ) : BinaryPatch, FreezableContainer by FreezableContainer.Impl("added") {
-    override var sourceTreeName: String by Delegates.freezable(mod.name)
     override fun getName(): String = mod.name
 
     fun onAdd() {
