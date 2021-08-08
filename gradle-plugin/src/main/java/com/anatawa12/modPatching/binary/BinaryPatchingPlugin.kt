@@ -4,6 +4,7 @@ import com.anatawa12.modPatching.binary.internal.BinaryConstants.CHECK_SIGNATURE
 import com.anatawa12.modPatching.binary.internal.BinaryConstants.COPY_JAR
 import com.anatawa12.modPatching.binary.internal.BinaryConstants.COPY_MODIFIED_CLASSES
 import com.anatawa12.modPatching.binary.internal.BinaryConstants.GENERATE_BSDIFF_PATCH
+import com.anatawa12.modPatching.binary.internal.BinaryConstants.LIST_MODIFIED_CLASSES
 import com.anatawa12.modPatching.binary.internal.BinaryConstants.REGENERATE_JAR
 import com.anatawa12.modPatching.binary.internal.BinaryConstants.RENAME_SOURCE_NAME
 import com.anatawa12.modPatching.binary.internal.BinaryPatchImpl
@@ -37,9 +38,17 @@ open class BinaryPatchingPlugin : Plugin<Project> {
         val jarTask = project.tasks.getByName("jar", Jar::class)
         //val modifiedClassesPath = Util.getBuildPath(project, "modified")
 
-        val copyModifiedClasses = project.tasks.create(COPY_MODIFIED_CLASSES, Copy::class) {
+        val listModifiedClasses = project.tasks.create(LIST_MODIFIED_CLASSES, ListModifiedClasses::class) {
             dependsOn(jarTask)
+            newerJar.set(jarTask.archiveFile)
+            modifiedInfoDir.set(Util.getBuildPath(project, "modified-infos"))
+        }
+        val copyModifiedClasses = project.tasks.create(COPY_MODIFIED_CLASSES, Copy::class) {
+            dependsOn(jarTask, listModifiedClasses)
             into(Util.getBuildPath(project, "modified"))
+            from(jarTask.archiveFile) {
+                include { listModifiedClasses.isModified(it.path) }
+            }
         }
         val checkSignature = project.tasks.create(CHECK_SIGNATURE, CheckSignatureModification::class) {
             dependsOn(copyModifiedClasses)
@@ -63,7 +72,7 @@ open class BinaryPatchingPlugin : Plugin<Project> {
             archiveExtension.set("jar")
             from(project.provider { project.zipTree(jarTask.archiveFile) }) {
                 // if modified is a class, do not include
-                exclude { copyModifiedClasses.destinationDir.resolve(it.path).exists() }
+                exclude { !listModifiedClasses.isUnmodified(it.path) }
             }
             from(generateBsdiffPatch.outTo)
         }
