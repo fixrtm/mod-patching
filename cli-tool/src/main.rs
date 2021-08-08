@@ -332,6 +332,10 @@ fn apply_patches(env: &PatchingEnv, mod_name: impl AsRef<str>) {
             )
         })
         .collect::<()>();
+
+    remake_unmodified_classes_jar(&env, &mod_name)
+        .doing("creating unmodified classes jar file")
+        .unwrap();
 }
 
 fn read_to_vec(capacity: usize, read: impl Read) -> std::io::Result<Vec<u8>> {
