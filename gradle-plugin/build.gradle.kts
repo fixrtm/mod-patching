@@ -1,5 +1,6 @@
 plugins {
     id("com.anatawa12.compile-time-constant")
+    id("com.gradle.plugin-publish")
     `kotlin-dsl`
     `java-gradle-plugin`
     kotlin("jvm")
@@ -41,6 +42,13 @@ tasks.jar {
 }
 
 gradlePlugin.isAutomatedPublishing = false
+
+pluginBundle {
+    website = "https://github.com/anatawa12/mod-patching#readme"
+    vcsUrl = "https://github.com/anatawa12/mod-patching.git"
+    description = "the plugin for modifying some mod"
+    mavenCoordinates.groupId = "${project.group}"
+}
 
 val pathingModCommon by gradlePlugin.plugins.creating {
     implementationClass = "com.anatawa12.modPatching.common.ModPatchingCommonPlugin"
