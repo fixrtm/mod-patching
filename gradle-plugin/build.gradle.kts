@@ -26,6 +26,12 @@ dependencies {
     }
     implementation("org.apache.commons:commons-compress:1.21")
     implementation("org.tukaani:xz:1.9")
+
+    implementation("org.apache.httpcomponents:httpclient:4.5.13")
+    implementation("org.ow2.asm:asm:9.2")
+    implementation("org.ow2.asm:asm-commons:9.2")
+    implementation("org.ow2.asm:asm-tree:9.2")
+    implementation("org.snakeyaml:snakeyaml-engine:2.3")
 }
 
 tasks.jar {
@@ -49,6 +55,11 @@ val pathingModBinary by gradlePlugin.plugins.creating {
 val pathingModSource by gradlePlugin.plugins.creating {
     implementationClass = "com.anatawa12.modPatching.source.SourcePatchingPlugin"
     id = "com.anatawa12.mod-patching.source"
+}
+
+val resourcesOnDev by gradlePlugin.plugins.creating {
+    implementationClass = "com.anatawa12.modPatching.resourcesDev.ResourcesDevPlugin"
+    id = "com.anatawa12.mod-patching.resources-dev"
 }
 
 publishing.publications.create<MavenPublication>("maven") {

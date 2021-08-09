@@ -114,6 +114,27 @@ src/main
       // is onRepo is not PATCHES, never created
 ```
 
+## Resources For Development Running
+
+This plugin will add tasks to use resources of other mod on development environment.
+
+```kotlin
+plugins {
+    id("com.anatawa12.mod-patching.resources-dev")
+}
+
+// add one of them to fml.coreMods.load system property
+// of running tasks.
+println(resourcesDev.forgeFmlCoreModClassName)
+println(resourcesDev.cpwFmlCoreModClassName)
+
+resourcesDev {
+    ofMod(rtm)
+    ofMod(ngtlib)
+}
+
+```
+
 [curseforge]: https://www.curseforge.com/minecraft/modpacks
 
 [source-patching-development]: ./docs/source-patching-development.md

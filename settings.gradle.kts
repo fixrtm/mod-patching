@@ -1,6 +1,7 @@
 rootProject.name = "mod-patching"
 include("gradle-plugin-separated")
 include("gradle-plugin")
+include("resources-dev-lib")
 
 // check if cargo is installed, this means rust is installed or not
 val exitValue = exec {
