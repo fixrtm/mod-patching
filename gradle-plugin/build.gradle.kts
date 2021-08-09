@@ -26,6 +26,12 @@ dependencies {
     }
     implementation("org.apache.commons:commons-compress:1.21")
     implementation("org.tukaani:xz:1.9")
+
+    implementation("org.apache.httpcomponents:httpclient:4.5.13")
+    implementation("org.ow2.asm:asm:9.2")
+    implementation("org.ow2.asm:asm-commons:9.2")
+    implementation("org.ow2.asm:asm-tree:9.2")
+    implementation("org.snakeyaml:snakeyaml-engine:2.3")
 }
 
 tasks.jar {
