@@ -3,16 +3,19 @@ include("gradle-plugin-separated")
 include("gradle-plugin")
 include("resources-dev-lib")
 
-// check if cargo is installed, this means rust is installed or not
-val exitValue = exec {
-    commandLine("cargo", "--version")
-    isIgnoreExitValue = true
-    standardOutput = DropOutputStream
-    errorOutput = DropOutputStream
-}.exitValue
+val cliToolEnabled = when (System.getenv("ENABLE_CLI_TOOL")?.toLowerCase()) {
+    null -> exec {
+        commandLine("cargo", "--version")
+        isIgnoreExitValue = true
+        standardOutput = DropOutputStream
+        errorOutput = DropOutputStream
+    }.exitValue == 0
+    "0", "false" -> false
+    else -> true
+}
 
 // if installed, add cli-tool project (cargo wrapper project)
-if (exitValue == 0) {
+if (cliToolEnabled) {
     include("cli-tool")
 }
 

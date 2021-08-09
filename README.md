@@ -120,7 +120,7 @@ This plugin will add tasks to use resources of other mod on development environm
 
 ```kotlin
 plugins {
-    id("com.anatawa12.mod-patching.resources-dev")
+    id("com.anatawa12.mod-patching.resources-dev") version "2.0.0"
 }
 
 // add one of them to fml.coreMods.load system property
