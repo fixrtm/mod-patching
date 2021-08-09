@@ -38,9 +38,7 @@ impl PatchingEnv {
 
     pub fn is_modified(&self, name: impl AsRef<str>) -> bool {
         let str = name.as_ref();
-        println!("test for {}", str);
         outer_class_names(str).any(|x| {
-            println!(">test for {}", x);
             self.main
                 .mods
                 .values()
