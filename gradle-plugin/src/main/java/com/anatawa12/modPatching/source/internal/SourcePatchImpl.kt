@@ -10,9 +10,7 @@ import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILE_MODS
 import com.anatawa12.modPatching.source.internal.SourceConstants.FORGEFLOWER_CONFIGURATION
 import com.anatawa12.modPatching.source.internal.SourceConstants.MAPPING_CONFIGURATION
 import org.gradle.api.tasks.JavaExec
-import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.provideDelegate
+import org.gradle.kotlin.dsl.*
 
 class SourcePatchImpl(
     override val mod: AbstractDownloadingMod,
@@ -98,5 +96,10 @@ class SourcePatchImpl(
             deobfJar = deobfJarPath,
         )
         patchingDir.save(yamlReformat(project))
+
+        patchDirPath.asFile(project)
+            .resolve(".gitattributes")
+            .writeText("*.java.patch text eol=lf\n" +
+                    ".gitattributes text eol=lf\n")
     }
 }
