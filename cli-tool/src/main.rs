@@ -67,11 +67,52 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap()
         .trim_end_matches(".exe")
         .trim_start_matches(match_until('.'));
+    let _finalize = AppFinalizeHandler;
+
     execution!(my_name, args => |_name| ());
 
     execution!(args.next().expect("no executable name").as_str(), args => |name| {
         panic!("unknown execution: {}", name)
     })
+}
+
+struct AppFinalizeHandler;
+
+impl Drop for AppFinalizeHandler {
+    fn drop(&mut self) {
+        if error_caused_but_details_not_enabled() {
+            eprintln!("'PATCHING_ERR_DETAILS=1' to more error details.");
+            eprintln!("please do not report issue with a log without 'PATCHING_ERR_DETAILS=1'");
+        }
+    }
+}
+
+// 0: disabled, some error caused
+// 1: enabled, some error caused
+// 2: uninitialized, no error caused
+static PATCHING_ERR_DETAILS_ENABLED: std::sync::atomic::AtomicU8 = std::sync::atomic::AtomicU8::new(2);
+
+fn error_caused_but_details_not_enabled() -> bool {
+    use std::sync::atomic::Ordering;
+    return PATCHING_ERR_DETAILS_ENABLED.load(Ordering::Acquire) == 0;
+}
+
+fn patching_err_details() -> bool {
+    use std::sync::atomic::Ordering;
+    match PATCHING_ERR_DETAILS_ENABLED.load(Ordering::Relaxed) {
+        0 => return false,
+        1 => return true,
+        2 => {
+            let stat = match std::env::var_os("PATCHING_ERR_DETAILS") {
+                None => false,
+                Some(ref v) if v == "false" || v == "0" => false,
+                Some(_) => true,
+            };
+            PATCHING_ERR_DETAILS_ENABLED.store(if stat { 1 } else { 0 }, Ordering::Release);
+            stat
+        }
+        _ => panic!("invalid PATCHING_ERR_DETAILS_ENABLED")
+    }
 }
 
 macro_rules! handle_block {
@@ -89,21 +130,27 @@ macro_rules! handle_block {
     };
 }
 
-macro_rules! handle_none {
-    ($val: expr => $blk: expr) => {
-        if let Some(v) = $val {
-            v
-        } else {
-            return $blk;
-        }
-    };
-}
-
 macro_rules! handle_err {
     ($val: expr => |$i: ident| $blk: expr) => {
         match $val {
             Ok(v) => v,
-            Err($i) => return $blk,
+            Err($i) => {
+                if patching_err_details() {
+                    eprintln!("error details: {:?}", &$i);
+                }
+                return $blk
+            },
+        }
+    };
+    ($val: expr => $blk: expr) => {
+        match $val {
+            Ok(v) => v,
+            Err(err) => {
+                if patching_err_details() {
+                    eprintln!("error details: {:?}", &err);
+                }
+                return $blk
+            },
         }
     };
 }
@@ -299,8 +346,9 @@ fn apply_patches(env: &PatchingEnv, mod_name: impl AsRef<str>) {
 
     let formatter = PatchFormatter::new();
     let mut file_names = Vec::new();
-    let mut sources_jar = handle_none!(File::open(env.get_source_jar_path(mod_name)).ok()
-        .and_then(|x| ZipArchive::new(x.buf_read()).ok()) => {
+    let mut sources_jar = handle_err!(File::open(env.get_source_jar_path(mod_name))
+        .map_err(Into::into)
+        .and_then(|x| ZipArchive::new(x.buf_read())) => {
         eprintln!("ERROR: no source jar found for {}! broken workspace or not prepared!", mod_name);
     });
     let patch_root = env.get_patch_path(mod_name);
@@ -311,10 +359,9 @@ fn apply_patches(env: &PatchingEnv, mod_name: impl AsRef<str>) {
             let file_name = format!("{}.java", class_name.replace(".", "/"));
             file_names.push(file_name.clone());
 
-            let src = handle_none!(sources_jar
+            let src = handle_err!(sources_jar
                 .by_name(&file_name)
-                .ok()
-                .and_then(|x| read_to_vec(x.size() as usize, x).ok()) => {
+                .and_then(|x| read_to_vec(x.size() as usize, x).map_err(Into::into)) => {
                 eprintln!("WARN: no source found for {}! broken workspace!", class_name);
                 None
             });
@@ -358,11 +405,11 @@ fn apply_patch_for(
     let patch_size = std::fs::metadata(&patch_path)
         .map(|x| x.len())
         .unwrap_or(32);
-    let patch_file = handle_none!(File::open(&patch_path).and_then(|x| read_to_vec(patch_size as usize, x)).ok() => {
+    let patch_file = handle_err!(File::open(&patch_path).and_then(|x| read_to_vec(patch_size as usize, x)) => {
         eprintln!("WARN: no valid patch found for {}! broken workspace!", class_name);
         write_slice_file(&src, out_path).ok();
     });
-    let patch_file = handle_none!(Patch::from_bytes(&patch_file).ok() => {
+    let patch_file = handle_err!(Patch::from_bytes(&patch_file) => {
         eprintln!("parsing patch for {} failed!", class_name);
         write_slice_file(&src, out_path).ok();
     });
@@ -375,7 +422,7 @@ fn apply_patch_for(
             class = &class_name,
         );
         let rej_path = source_root.join(&format!("{}.rej", &file_name));
-        let rej_file = handle_none!(File::create(rej_path).ok() => {
+        let rej_file = handle_err!(File::create(rej_path) => {
             eprintln!("crating .rej for {} failed!", class_name);
         });
 
@@ -384,7 +431,7 @@ fn apply_patch_for(
             .iter()
             .enumerate()
             .filter_map(|(i, x)| take_if!((x) if failed.contains(&i)));
-        handle_none!(write_rej_file(formatter, rej_file.buf_write(), hunks).ok() => {
+        handle_err!(write_rej_file(formatter, rej_file.buf_write(), hunks) => {
             eprintln!("crating .rej for {} failed!", class_name);
         });
     }
@@ -436,8 +483,8 @@ fn create_diff(env: &PatchingEnv, mod_name: impl AsRef<str>) {
 
     let formatter = PatchFormatter::new().with_space_on_empty_line();
     let mut file_names = Vec::new();
-    let mut sources_jar = handle_none!(File::open(env.get_source_jar_path(mod_name)).ok()
-        .and_then(|x| ZipArchive::new(x.buf_read()).ok()) => {
+    let mut sources_jar = handle_err!(File::open(env.get_source_jar_path(mod_name)).map_err(Into::into)
+        .and_then(|x| ZipArchive::new(x.buf_read())) => {
         eprintln!("ERROR: no source jar found for {}! broken workspace or not prepared!", mod_name);
     });
     let patch_root = env.get_patch_path(mod_name);
@@ -448,10 +495,9 @@ fn create_diff(env: &PatchingEnv, mod_name: impl AsRef<str>) {
             let file_name = format!("{}.java", class_name.replace(".", "/"));
             file_names.push(file_name.clone());
 
-            let src = handle_none!(sources_jar
+            let src = handle_err!(sources_jar
                 .by_name(&file_name)
-                .ok()
-                .and_then(|x| read_to_vec(x.size() as usize, x).ok()) => {
+                .and_then(|x| read_to_vec(x.size() as usize, x).map_err(Into::into)) => {
                 eprintln!("WARN: no source found for {}! broken workspace!", class_name);
                 None
             });
@@ -486,7 +532,7 @@ fn create_diff_for(
         .map(|x| x.len())
         .unwrap_or(32);
 
-    let java_file = handle_none!(File::open(&java_path).and_then(|x| read_to_vec(patch_size as usize, x)).ok() => {
+    let java_file = handle_err!(File::open(&java_path).and_then(|x| read_to_vec(patch_size as usize, x)) => {
         eprintln!("ERROR: no source code found for {}! broken workspace!", class_name);
     });
 
