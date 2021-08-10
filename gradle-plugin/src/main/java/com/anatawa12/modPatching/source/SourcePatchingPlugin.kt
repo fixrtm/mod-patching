@@ -117,10 +117,10 @@ open class SourcePatchingPlugin : Plugin<Project> {
             (OperatingSystem.WINDOWS to Architecture.ARM64) to "aarch64-pc-windows-msvc",
             (OperatingSystem.WINDOWS to Architecture.X86) to "i686-pc-windows-msvc",
             (OperatingSystem.WINDOWS to Architecture.X64) to "x86_64-pc-windows-msvc",
-            (OperatingSystem.WINDOWS to Architecture.ARM64) to "aarch64-unknown-linux-musl",
-            (OperatingSystem.WINDOWS to Architecture.ARM32) to "armv7-unknown-linux-musleabihf",
-            (OperatingSystem.WINDOWS to Architecture.X86) to "i686-unknown-linux-musl",
-            (OperatingSystem.WINDOWS to Architecture.X64) to "x86_64-unknown-linux-musl",
+            (OperatingSystem.LINUX to Architecture.ARM64) to "aarch64-unknown-linux-musl",
+            (OperatingSystem.LINUX to Architecture.ARM32) to "armv7-unknown-linux-musleabihf",
+            (OperatingSystem.LINUX to Architecture.X86) to "i686-unknown-linux-musl",
+            (OperatingSystem.LINUX to Architecture.X64) to "x86_64-unknown-linux-musl",
         )
 
         private fun computeCurrentTargetTriple(): String {
