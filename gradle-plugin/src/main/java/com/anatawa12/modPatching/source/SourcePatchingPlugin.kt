@@ -13,8 +13,7 @@ import com.anatawa12.modPatching.source.internal.SourceConstants.MAPPING_CONFIGU
 import com.anatawa12.modPatching.source.internal.SourceConstants.MOD_PATCHING_SOURCE_UTIL_CLI_CONFIGURATION
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.*
 import java.io.File
 
 @Suppress("unused")
@@ -88,35 +87,17 @@ open class SourcePatchingPlugin : Plugin<Project> {
         }
 
         project.afterEvaluate {
-            val logger = project.logger
             if (patches.autoInstallCli) {
                 installSourceUtilLocally.install()
             }
+            // if specified as true or root project
             val noIgnoreWarn = project.providers
                 .gradleProperty("com.anatawa12.mod-patching.no-ignore-warn")
                 .forUseAtConfigurationTime().orNull
-                .equals("true", ignoreCase = true)
+                ?.equals("true", ignoreCase = true)
+                ?: (project == project.rootProject)
             if (!noIgnoreWarn) {
-                val gitignore = projectDir.resolve(".gitignore").readTextOr("")
-                val prefix = installSourceUtilLocally.prefix.get()
-
-                val files: MutableSet<String>
-                val errors: String
-                if (prefix == "") {
-                    files = mutableSetOf("add-modify*", "apply-patches*", "create-diff*")
-                    errors = "add-modify*, apply-patches*, and create-diff* are"
-                } else {
-                    files = mutableSetOf("$prefix.*")
-                    errors = "$prefix.* is"
-                }
-
-                for (line in gitignore.lineSequence()) {
-                    files.removeIf { line == it || line == "/$it" }
-                }
-                if (files.isNotEmpty()) {
-                    logger.warn("$errors not git ignored! generated patching mod utility " +
-                            "should be ignored because they're environment dependent.")
-                }
+                GitChecker.checkForRepo(project, installSourceUtilLocally.prefix.get())
             }
         }
     }
