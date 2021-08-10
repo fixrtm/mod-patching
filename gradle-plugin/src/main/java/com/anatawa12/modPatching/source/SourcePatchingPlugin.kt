@@ -113,7 +113,9 @@ open class SourcePatchingPlugin : Plugin<Project> {
     companion object {
         private val targetTriples = mapOf(
             (OperatingSystem.MACOS to Architecture.X64) to "x86_64-apple-darwin",
-            (OperatingSystem.MACOS to Architecture.ARM64) to "aarch64-apple-darwin",
+            // currently, no build for aarch64-darwin. use x64 with Rosetta
+            (OperatingSystem.MACOS to Architecture.ARM64) to "x86_64-apple-darwin",
+            //(OperatingSystem.MACOS to Architecture.ARM64) to "aarch64-apple-darwin",
             (OperatingSystem.WINDOWS to Architecture.ARM64) to "aarch64-pc-windows-msvc",
             (OperatingSystem.WINDOWS to Architecture.X86) to "i686-pc-windows-msvc",
             (OperatingSystem.WINDOWS to Architecture.X64) to "x86_64-pc-windows-msvc",
