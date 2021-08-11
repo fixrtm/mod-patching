@@ -32,7 +32,7 @@ class PatchingDir private constructor(val root: File) {
             root.resolve("local.yaml").writeText(Yaml.default.encodeToString(LocalConfig.serializer(), local))
             root.resolve("main.yaml").writeText(Yaml.default.encodeToString(PatchingMainConfig.serializer(), main))
             root.resolve(".gitattributes")
-                .writeText("*.yml text eol=lf\n" +
+                .writeText("*.yaml text eol=lf\n" +
                         ".gitattributes text eol=lf\n")
             root.resolve(".gitignore").writeText("local.yaml\n.gitignore\n")
             yamlFormatter.accept(root.resolve("main.yaml"))
