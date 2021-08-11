@@ -1,6 +1,7 @@
 package com.anatawa12.modPatching.source.internal
 
 import com.anatawa12.modPatching.common.internal.AbstractDownloadingMod
+import com.anatawa12.modPatching.common.internal.CommonUtil
 import com.anatawa12.modPatching.common.internal.Delegates
 import com.anatawa12.modPatching.common.internal.FreezableContainer
 import com.anatawa12.modPatching.internal.*
@@ -99,7 +100,7 @@ class SourcePatchImpl(
             sourceJar = sourcesJarPath,
             deobfJar = deobfJarPath,
         )
-        patchingDir.save(yamlReformat(project))
+        patchingDir.save(yamlReformat(project), CommonUtil.getCacheBase(project))
 
         patchDirPath.asFile(project)
             .resolve(".gitattributes")

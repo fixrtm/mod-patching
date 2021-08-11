@@ -15,20 +15,17 @@ import java.util.function.Consumer
 private const val PATCHING_DIR_NAME = ".patching-mods"
 
 class PatchingDir private constructor(val root: File) {
-    lateinit var local: LocalConfig
     lateinit var main: PatchingMainConfig
 
     fun load() {
-        local = root.resolve("local.yaml")
-            .readText()
-            .let { Yaml.default.decodeFromString(LocalConfig.serializer(), it) }
         main = root.resolve("main.yaml")
             .readText()
             .let { Yaml.default.decodeFromString(PatchingMainConfig.serializer(), it) }
     }
 
-    fun save(yamlFormatter: Consumer<File>) {
+    fun save(yamlFormatter: Consumer<File>, cacheBase: File) {
         try {
+            val local = LocalConfig(cacheBase.toString())
             root.resolve("local.yaml").writeText(Yaml.default.encodeToString(LocalConfig.serializer(), local))
             root.resolve("main.yaml").writeText(Yaml.default.encodeToString(PatchingMainConfig.serializer(), main))
             root.resolve(".gitattributes")
