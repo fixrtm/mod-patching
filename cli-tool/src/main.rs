@@ -294,8 +294,7 @@ fn command_add_modify() -> Result<(), Box<dyn std::error::Error>> {
     // 1. copy source file
     handle_block!({
         let mut source_entry = source_jar.by_name(&relative_java_path)?.buf_read();
-        std::fs::create_dir_all(source_file_path.parent().unwrap())?;
-        let mut source_file = std::fs::File::create(&source_file_path)?.buf_write();
+        let mut source_file = create_file_with_dir(&source_file_path)?.buf_write();
         std::io::copy(&mut source_entry, &mut source_file)?;
         source_file.flush()?;
     })
@@ -303,8 +302,7 @@ fn command_add_modify() -> Result<(), Box<dyn std::error::Error>> {
 
     // 2. create empty patch file
     handle_block!({
-        std::fs::create_dir_all(patch_file_path.parent().unwrap())?;
-        let mut patch_file = std::fs::File::create(patch_file_path)?.buf_write();
+        let mut patch_file = create_file_with_dir(patch_file_path)?.buf_write();
         writeln!(patch_file, "--- a/{}", &relative_java_path)?;
         writeln!(patch_file, "+++ b/{}", &relative_java_path)?;
         patch_file.flush()?;
@@ -422,7 +420,7 @@ fn apply_patch_for(
             class = &class_name,
         );
         let rej_path = source_root.join(&format!("{}.rej", &file_name));
-        let rej_file = handle_err!(File::create(rej_path) => {
+        let rej_file = handle_err!(create_file_with_dir(rej_path) => {
             eprintln!("crating .rej for {} failed!", class_name);
         });
 
@@ -466,7 +464,7 @@ fn remake_unmodified_classes_jar(env: &PatchingEnv, mod_name: &str) -> std::io::
 
     let mut archive = ZipArchive::new(std::fs::File::open(deobf_jar_path)?.buf_read())?;
     let mut writer =
-        ZipWriter::new(std::fs::File::create(&unmodified_classes_jar_path)?.buf_write());
+        ZipWriter::new(create_file_with_dir(&unmodified_classes_jar_path)?.buf_write());
     for i in 0..archive.len() {
         let mut file = archive.by_index(i)?;
         if file.name().ends_with(".class") && !env.is_modified_class_name(file.name()) {
