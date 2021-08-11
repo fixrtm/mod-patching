@@ -61,6 +61,8 @@ class SourcePatchImpl(
             dependsOn(deobfTaskName, mod.downloadTaskName)
             classpath = project.configurations.getByName(FORGEFLOWER_CONFIGURATION)
 
+            // always use \n for eol char
+            systemProperty("line.separator", "\n")
             inputs.file(deobfJarPath.asFile(project))
             outputs.file(sourcesJarPath.asFile(project))
 
@@ -72,6 +74,8 @@ class SourcePatchImpl(
                 "-rsy=1",
                 "-iec=1",
                 "-jvn=1",
+                // always use \n for eol
+                "-nls=1",
                 "-log=WARN",
                 deobfJarPath.asFile(project),
                 sourcesJarPath.asFile(project),
