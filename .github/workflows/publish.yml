@@ -19,7 +19,7 @@ jobs:
 
       - name: Update Version
         run: |
-          git checkout releasing
+          git switch -c releasing
           # set current version
           VERSION="$(get-version)"
           if ! [[ "$VERSION" = *-SNAPSHOT ]]; then
@@ -31,9 +31,15 @@ jobs:
           # create changelog
           generate-changelog -v "$VERSION" --date-for-unreleased
           # update versions in documentation
+          function replace_version() {
           perl -pi \
-            -e 's/(?<=\Q("com.anatawa12.mod-patching.\E[^"]+\Q") version \E)".*"/"'$VERSION'"/' \
+            -e 's/(?<=\Q("com.anatawa12.mod-patching.'"$1"'") version \E)".*"/"'$VERSION'"/' \
             README.md 
+          }
+          replace_version common
+          replace_version binary
+          replace_version source
+          replace_version resources-dev
           # commit & tag & push
           git add .
           git commit -m "v$VERSION"
@@ -181,12 +187,11 @@ jobs:
 
       - name: Update To Next Version
         run: |
-          git checkout master
+          git switch -c master
           VERSION="$(get-version)"
           VERSION="$(version-next "$VERSION")"
           set-version "$(version-snapshot "$VERSION")"
           git add .
           git commit -m "prepare for next version: $VERSION"
-          git push
           git push -u origin master
           git push --delete origin releasing
