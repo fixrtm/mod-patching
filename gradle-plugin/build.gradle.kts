@@ -51,21 +51,29 @@ pluginBundle {
 }
 
 val pathingModCommon by gradlePlugin.plugins.creating {
+    displayName = "Mod Patching Common Plugin"
+    description = "The common plugin of Mod Patching"
     implementationClass = "com.anatawa12.modPatching.common.ModPatchingCommonPlugin"
     id = "com.anatawa12.mod-patching.common"
 }
 
 val pathingModBinary by gradlePlugin.plugins.creating {
+    displayName = "Mod Patching Binary Plugin"
+    description = "The binary patching plugin of Mod Patching"
     implementationClass = "com.anatawa12.modPatching.binary.BinaryPatchingPlugin"
     id = "com.anatawa12.mod-patching.binary"
 }
 
 val pathingModSource by gradlePlugin.plugins.creating {
+    displayName = "Mod Patching Source Plugin"
+    description = "The source patching plugin of Mod Patching"
     implementationClass = "com.anatawa12.modPatching.source.SourcePatchingPlugin"
     id = "com.anatawa12.mod-patching.source"
 }
 
 val resourcesOnDev by gradlePlugin.plugins.creating {
+    displayName = "Mod Patching Resource Development Plugin"
+    description = "The plugin for on-development environment resource configuration"
     implementationClass = "com.anatawa12.modPatching.resourcesDev.ResourcesDevPlugin"
     id = "com.anatawa12.mod-patching.resources-dev"
 }

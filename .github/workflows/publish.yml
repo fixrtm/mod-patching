@@ -175,6 +175,8 @@ jobs:
           SONATYPE_PASS: "${{ secrets.SONATYPE_PASS }}"
 
       - name: Build
+        env:
+          RUSTFLAGS: -C target-feature=+crt-static
         run: ./gradlew cli-tool:publish -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
 
   next-version:
