@@ -96,33 +96,42 @@ jobs:
           - target: x86_64-apple-darwin
             os: macos-latest
             test: true
+            cross: false
           # waiting for approval 
           # - target: aarch64-apple-darwin
           #   os: macos-11
           #   test: true
+          #   cross: false
           # windows: with cross on ubuntu
           - target: aarch64-pc-windows-msvc
             os: windows-latest
             test: false
+            cross: false
           - target: i686-pc-windows-msvc
             os: windows-latest
             test: true
+            cross: false
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             test: true
+            cross: false
           # linux: with cross on ubuntu
           - target: aarch64-unknown-linux-musl
             os: ubuntu-latest
             test: true
+            cross: true
           - target: armv7-unknown-linux-musleabihf
             os: ubuntu-latest
             test: true
+            cross: true
           - target: i686-unknown-linux-musl
             os: ubuntu-latest
             test: true
+            cross: true
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
             test: true
+            cross: true
 
     runs-on: ${{ matrix.os }}
 
@@ -147,20 +156,9 @@ jobs:
           distribution: 'adopt'
           java-version: '8'
 
-      - name: setup variables
-        id: vars
-        shell: bash
-        run: |
-          # if linux, use cross but not for other platforms
-          if [[ "$(uname -srm)" == *"Linux"* ]]; then
-            echo '::set-output name=cross::true'
-          else
-            echo '::set-output name=cross::false'
-          fi
-
       - name: Install Cross
         run: cargo install cross
-        if: ${{ fromJson(steps.vars.outputs.cross) }}
+        if: ${{ fromJson(matrix.cross) }}
 
       - name: Prepare Build
         run: |
@@ -177,7 +175,7 @@ jobs:
       - name: Build
         env:
           RUSTFLAGS: -C target-feature=+crt-static
-        run: ./gradlew cli-tool:publish -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
+        run: ./gradlew cli-tool:publish -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ matrix.cross }}
 
   next-version:
     needs: [ build-publish-rust, build-publish-java ]
