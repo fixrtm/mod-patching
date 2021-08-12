@@ -15,6 +15,7 @@ val target = findProperty("cli-tool-target")?.toString()
 val useCross = findProperty("cli-tool-cross").toString().toBoolean()
 val cargoTarget = cargoProj.targets.create(target) {
     if (useCross) {
+        println("configured to use cross")
         toolChain.set(CargoToolChain.cross)
     }
 }
