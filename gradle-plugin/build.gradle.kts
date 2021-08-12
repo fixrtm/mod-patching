@@ -48,6 +48,7 @@ pluginBundle {
     vcsUrl = "https://github.com/anatawa12/mod-patching.git"
     description = "the plugin for modifying some mod"
     mavenCoordinates.groupId = "${project.group}"
+    tags = listOf("minecraft", "patch")
 }
 
 val pathingModCommon by gradlePlugin.plugins.creating {
