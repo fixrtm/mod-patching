@@ -20,30 +20,11 @@ jobs:
           - target: x86_64-apple-darwin
             os: macos-latest
             test: true
-          # waiting for approval 
-          # - target: aarch64-apple-darwin
-          #   os: macos-11
-          #   test: true
-          # windows: with cross on ubuntu
-          - target: aarch64-pc-windows-msvc
-            os: windows-latest
-            test: false
-          - target: i686-pc-windows-msvc
-            os: windows-latest
-            test: true
+          # windows: no cross
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             test: true
           # linux: with cross on ubuntu
-          - target: aarch64-unknown-linux-musl
-            os: ubuntu-latest
-            test: true
-          - target: armv7-unknown-linux-musleabihf
-            os: ubuntu-latest
-            test: true
-          - target: i686-unknown-linux-musl
-            os: ubuntu-latest
-            test: true
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
             test: true
