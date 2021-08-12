@@ -6,8 +6,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.getPlugin
-import org.gradle.kotlin.dsl.property
+import org.gradle.kotlin.dsl.*
 import java.io.File
 
 open class CargoBuildTask : DefaultTask(), EnvironmentProperties {
@@ -104,6 +103,7 @@ open class CargoBuildTask : DefaultTask(), EnvironmentProperties {
 
             executable = toolChain.get().cargo
             args("build")
+            args("--verbose")
             args("--target", target.get())
             if (releaseBuild.get())
                 args("--release")
