@@ -5,6 +5,10 @@ on:
 env:
   RELEASER_CHANGER: gradle-properties
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   version-up:
     environment: deployment
