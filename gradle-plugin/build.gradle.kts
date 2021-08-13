@@ -95,3 +95,8 @@ tasks.createCompileTimeConstant {
     constantsClass = "com.anatawa12.modPatching.internal.Constants"
     values(mapOf("VERSION_NAME" to project.version.toString()))
 }
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
