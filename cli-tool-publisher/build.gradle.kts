@@ -14,11 +14,23 @@ println("configured for:")
 for ((target, binary) in binaries) {
     println("$target: $binary")
 }
+val outDir = buildDir.resolve("artifacts")
+
+val generateArtifacts by tasks.creating {
+    doLast {
+        outDir.mkdirs()
+        for ((target, binary) in binaries) {
+            binary.copyTo(outDir.resolve("mod-patching-$target.exe"),
+                overwrite = true)
+        }
+    }
+}
 
 publishing.publications.create<MavenPublication>("maven") {
     artifactId = "cli-tool"
-    for ((target, binary) in binaries) {
-        artifact(binary) {
+    for ((target, _) in binaries) {
+        artifact(outDir.resolve("mod-patching-$target.exe")) {
+            builtBy(generateArtifacts)
             classifier = target
             extension = "exe"
         }
