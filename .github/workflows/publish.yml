@@ -157,7 +157,7 @@ jobs:
           java-version: '8'
 
       - name: Install Cross
-        run: cargo install cross
+        run: cargo install cross && cross --version
         if: ${{ fromJson(matrix.cross) }}
 
       - name: Prepare Build
