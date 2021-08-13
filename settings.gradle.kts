@@ -2,6 +2,7 @@ rootProject.name = "mod-patching"
 include("gradle-plugin-separated")
 include("gradle-plugin")
 include("resources-dev-lib")
+include("cli-tool-publisher")
 
 val cliToolEnabled = when (System.getenv("ENABLE_CLI_TOOL")?.toLowerCase()) {
     null -> exec {
