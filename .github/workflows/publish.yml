@@ -135,7 +135,7 @@ jobs:
           name: cli-${{ matrix.target }}
           path: cli-tool/build/cargo/${{ matrix.target }}/release/mod-patching*
 
-  publish-java:
+  publish:
     needs: [ version-up, build-rust ]
     environment: deployment
     runs-on: ubuntu-latest
@@ -175,7 +175,7 @@ jobs:
       - run: ./gradlew publish publishPlugins
 
   next-version:
-    needs: [ build-publish-rust, build-publish-java ]
+    needs: [ publish ]
     environment: deployment
     runs-on: ubuntu-latest
     steps:
