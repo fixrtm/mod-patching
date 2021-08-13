@@ -137,7 +137,6 @@ jobs:
 
     env:
       ENABLE_CLI_TOOL: true
-      RUSTFLAGS: -C target-feature=+crt-static
 
     steps:
       - uses: actions/checkout@v2
