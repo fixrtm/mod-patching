@@ -20,6 +20,8 @@ val cargoTarget = cargoProj.targets.create(target) {
     }
 }
 
+// also edit in cli-tool-publisher.
+// cli-tool-publisher is used to publish to maven central.
 publishing.publications.create<MavenPublication>("maven") {
     artifact(cargoTarget.binaryFile) {
         builtBy(cargoTarget.build)
