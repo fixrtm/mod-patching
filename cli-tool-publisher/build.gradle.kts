@@ -7,7 +7,7 @@ val binaries = file("download").listFiles().orEmpty()
     .filter { it.resolve("mod-patching").exists() || it.resolve("mod-patching.exe").exists() }
     .map { file ->
         val binary = if (file.resolve("mod-patching").exists()) file.resolve("mod-patching")
-        else file.resolve("mod-patching.exe").exists()
+        else file.resolve("mod-patching.exe")
         file.name.removePrefix("cli-") to binary
     }
 println("configured for:")
