@@ -183,16 +183,22 @@ jobs:
         with:
           token: "${{ secrets.ACTIONS_PAT }}"
           ref: releasing
+          depth: 2
       - uses: anatawa12/something-releaser@v2
       - run: set-git-user anatawa12-bot
 
       - name: Update To Next Version
         run: |
-          git switch -c master
           VERSION="$(get-version)"
           VERSION="$(version-next "$VERSION")"
           set-version "$(version-snapshot "$VERSION")"
           git add .
           git commit -m "prepare for next version: $VERSION"
+          git push
+          # clone master
+          git config --add remote.origin.fetch +refs/heads/master:refs/remotes/origin/master
+          git fetch --depth 1 origin master
+          git switch master
+          git reset --hard releasing
           git push -u origin master
           git push --delete origin releasing
