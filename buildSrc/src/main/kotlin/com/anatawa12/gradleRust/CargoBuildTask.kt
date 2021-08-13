@@ -103,7 +103,6 @@ open class CargoBuildTask : DefaultTask(), EnvironmentProperties {
 
             executable = toolChain.get().cargo
             args("build")
-            args("--verbose")
             args("--target", target.get())
             if (releaseBuild.get())
                 args("--release")
