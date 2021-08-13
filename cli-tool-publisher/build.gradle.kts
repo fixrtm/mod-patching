@@ -16,6 +16,7 @@ for ((target, binary) in binaries) {
 }
 
 publishing.publications.create<MavenPublication>("maven") {
+    artifactId = "cli-tool"
     for ((target, binary) in binaries) {
         artifact(binary) {
             classifier = target
