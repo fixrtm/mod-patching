@@ -3,7 +3,7 @@ plugins {
     id("com.gradle.plugin-publish") version "0.15.0" apply false
     id("com.github.johnrengelman.shadow") version "7.0.0"
     kotlin("jvm") version "1.5.30" apply false
-    kotlin("plugin.serialization") version "1.5.21" apply false
+    kotlin("plugin.serialization") version "1.5.30" apply false
 }
 
 group = "com.anatawa12.mod-patching"
