@@ -1,6 +1,6 @@
 # patching mod creating gradle plugin
 
-[![a12 maintenance: Slowly](https://anatawa12.com/short.php?q=a12-slowly-svg)](https://anatawa12.com/short.php?q=a12-slowly-doc)
+[![a12 maintenance: Slowly](https://api.anatawa12.com/short/a12-slowly-svg)](https://api.anatawa12.com/short/a12-slowly-doc)
 
 **Now working on rewriting to remove relationship to ForgeGradle. Documentation may not correct for latest SNAPSHOT.
 See [at 85780a0]
