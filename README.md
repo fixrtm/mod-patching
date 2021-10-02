@@ -2,12 +2,6 @@
 
 [![a12 maintenance: Slowly](https://api.anatawa12.com/short/a12-slowly-svg)](https://api.anatawa12.com/short/a12-slowly-doc)
 
-**Now working on rewriting to remove relationship to ForgeGradle. Documentation may not correct for latest SNAPSHOT.
-See [at 85780a0]
-for documentation for latest SNAPSHOT**
-
-[at 85780a0]: https://github.com/anatawa12/mod-patching/tree/85780a0a28c9a7473d394b40ceef69f93f1bd906
-
 ## Common (mod downloader)
 
 This plugin adds task to download mod from mod providers. Currently, supports [curseforge].
