@@ -1,12 +1,12 @@
 # patching mod creating gradle plugin
 
 [![a12 maintenance: Slowly](https://api.anatawa12.com/short/a12-slowly-svg)](https://api.anatawa12.com/short/a12-slowly-doc)
-
-**Now working on rewriting to remove relationship to ForgeGradle. Documentation may not correct for latest SNAPSHOT.
-See [at 85780a0]
-for documentation for latest SNAPSHOT**
-
-[at 85780a0]: https://github.com/anatawa12/mod-patching/tree/85780a0a28c9a7473d394b40ceef69f93f1bd906
+[![Gradle plugin: com.anatawa12.mod-patching.resources-dev](https://img.shields.io/gradle-plugin-portal/v/com.anatawa12.mod-patching.resources-dev?colorB=007ec6&label=gradle%20plugin:%20resources-dev&logo=gradle)](https://plugins.gradle.org/plugin/com.anatawa12.mod-patching.resources-dev)
+[![Gradle plugin: com.anatawa12.mod-patching.source](https://img.shields.io/gradle-plugin-portal/v/com.anatawa12.mod-patching.source?colorB=007ec6&label=gradle%20plugin:%20source&logo=gradle)](https://plugins.gradle.org/plugin/com.anatawa12.mod-patching.source)
+[![Gradle plugin: com.anatawa12.mod-patching.common](https://img.shields.io/gradle-plugin-portal/v/com.anatawa12.mod-patching.common?colorB=007ec6&label=gradle%20plugin:%20common&logo=gradle)](https://plugins.gradle.org/plugin/com.anatawa12.mod-patching.common)
+[![Gradle plugin: com.anatawa12.mod-patching.binary](https://img.shields.io/gradle-plugin-portal/v/com.anatawa12.mod-patching.binary?colorB=007ec6&label=gradle%20plugin:%20binary&logo=gradle)](https://plugins.gradle.org/plugin/com.anatawa12.mod-patching.binary)
+[![Maven Central: cli-tool](https://img.shields.io/maven-central/v/com.anatawa12.mod-patching/cli-tool?logo=apachemaven&label=maven:%20cli-tool)](https://mvnrepository.com/artifact/com.anatawa12.mod-patching/cli-tool/latest)
+[![Maven Central: resources-dev-lib](https://img.shields.io/maven-central/v/com.anatawa12.mod-patching/resources-dev-lib?logo=apachemaven&label=maven:%20resources-dev-lib)](https://mvnrepository.com/artifact/com.anatawa12.mod-patching/resources-dev-lib/latest)
 
 ## Common (mod downloader)
 
