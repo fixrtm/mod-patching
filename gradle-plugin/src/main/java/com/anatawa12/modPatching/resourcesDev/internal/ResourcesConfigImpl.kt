@@ -24,8 +24,8 @@ class ResourcesConfigImpl(override val mod: AbstractDownloadingMod) : ResourcesC
             destinationDirectory.set(path.parentFile)
             archiveFileName.set(path.name)
         }
-        project.dependencies.add("runtimeOnly", resourcesTask.archiveFile
-            .map { project.files(it).builtBy(resourcesTask) })
+        project.dependencies.add("runtimeOnly",
+            project.providers.provider { project.files(resourcesTask.archiveFile).builtBy(resourcesTask) })
         helperTask.dependsOn(resourcesTask)
         helperTask.jarFileList.from(resourcesTask)
     }
