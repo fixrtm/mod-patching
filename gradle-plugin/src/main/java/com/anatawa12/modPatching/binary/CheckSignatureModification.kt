@@ -4,11 +4,15 @@ import com.anatawa12.modPatching.binary.internal.flatten
 import com.anatawa12.modPatching.internal.SignatureChecker
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileTree
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.property
+import org.gradle.kotlin.dsl.*
 import java.util.function.Supplier
+import kotlin.collections.Map
+import kotlin.collections.asSequence
+import kotlin.collections.mutableMapOf
+import kotlin.collections.set
 
 open class CheckSignatureModification : DefaultTask() {
     @InputFiles
@@ -17,7 +21,7 @@ open class CheckSignatureModification : DefaultTask() {
     @InputFiles
     val modifiedClasses = project.objects.listProperty<FileTree>()
 
-    @InputFiles
+    @Input
     val rootPackage = project.objects.property<String>().convention("")
 
     @TaskAction
