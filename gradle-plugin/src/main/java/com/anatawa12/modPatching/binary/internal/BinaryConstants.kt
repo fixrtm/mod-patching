@@ -1,26 +1,24 @@
 package com.anatawa12.modPatching.binary.internal
 
-import org.gradle.util.GUtil
-
 object BinaryConstants {
     // list modified classes
-    val LIST_MODIFIED_CLASSES = GUtil.toLowerCamelCase("list modified classes")
+    val LIST_MODIFIED_CLASSES = "listModifiedClasses"
 
     // Copies changed files to build/patching-mod/modified
-    val COPY_MODIFIED_CLASSES = GUtil.toLowerCamelCase("copy modified classes")
+    val COPY_MODIFIED_CLASSES = "copyModifiedClasses"
 
     // rename source file name for modified class files
-    val RENAME_SOURCE_NAME = GUtil.toLowerCamelCase("rename source name")
+    val RENAME_SOURCE_NAME = "renameSourceName"
 
     // generates bsdiff patch file
-    val GENERATE_BSDIFF_PATCH = GUtil.toLowerCamelCase("generate bsdiff patch")
+    val GENERATE_BSDIFF_PATCH = "generateBsdiffPatch"
 
     // regenerates patch files with
-    val REGENERATE_JAR = GUtil.toLowerCamelCase("regenerate jar")
+    val REGENERATE_JAR = "regenerateJar"
 
     // regenerates patch files with
-    val COPY_JAR = GUtil.toLowerCamelCase("copy jar")
+    val COPY_JAR = "copyJar"
 
     // check binary compatibility between original and new one
-    val CHECK_SIGNATURE = GUtil.toLowerCamelCase("check signature")
+    val CHECK_SIGNATURE = "checkSignature"
 }
