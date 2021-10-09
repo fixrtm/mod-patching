@@ -22,7 +22,7 @@ open class ResourcesHelperGenerator : DefaultTask() {
     val output = project.objects.fileProperty()
 
     @Internal
-    val outputFiles = output.map { project.files(it).builtBy(this) }
+    val outputFiles = project.provider { project.files(output.get()).builtBy(this) }
 
     @TaskAction
     fun execute() {

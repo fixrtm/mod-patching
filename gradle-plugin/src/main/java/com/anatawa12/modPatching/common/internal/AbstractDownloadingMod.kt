@@ -7,7 +7,6 @@ import com.anatawa12.modPatching.internal.FrozenByFreeze
 import com.anatawa12.modPatching.internal.RelativePathFromCacheRoot
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.util.GUtil.toLowerCamelCase
 
 abstract class AbstractDownloadingMod(val project: Project) :
     DownloadingMod,
@@ -31,7 +30,7 @@ abstract class AbstractDownloadingMod(val project: Project) :
     fun getJarPath(classifier: String) = cacheBaseDir.join("$cacheBaseName-$classifier.jar")
 
     @FrozenByFreeze
-    fun getTaskName(verb: String) = toLowerCamelCase("$verb mod $name")
+    fun getTaskName(verb: String) = "${verb}Mod${name.capitalize()}"
 
     @FrozenByFreeze
     val obfJarPath by lazy { getJarPath("raw") }
