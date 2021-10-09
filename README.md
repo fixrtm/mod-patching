@@ -16,7 +16,7 @@ This plugin adds task to download mod from mod providers. Currently, supports [c
 
 ```kotlin
 plugins {
-    id("com.anatawa12.mod-patching.common") version "2.0.0"
+    id("com.anatawa12.mod-patching.common") version "2.0.1"
 }
 
 // add mod to download. the returned instance will be 
@@ -55,7 +55,7 @@ automatically be applied.
 
 ```kotlin
 plugins {
-    id("com.anatawa12.mod-patching.binary") version "2.0.0"
+    id("com.anatawa12.mod-patching.binary") version "2.0.1"
 }
 
 binPatching {
@@ -80,7 +80,7 @@ See [documentation][source-patching-development] for more details.
 
 ```kotlin
 plugins {
-    id("com.anatawa12.mod-patching.source") version "2.0.0"
+    id("com.anatawa12.mod-patching.source") version "2.0.1"
 }
 
 sourcePatching {
@@ -120,7 +120,7 @@ This plugin will add tasks to use resources of other mod on development environm
 
 ```kotlin
 plugins {
-    id("com.anatawa12.mod-patching.resources-dev") version "2.0.0"
+    id("com.anatawa12.mod-patching.resources-dev") version "2.0.1"
 }
 
 // add one of them to fml.coreMods.load system property
