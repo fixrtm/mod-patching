@@ -63,11 +63,10 @@ jobs:
             os: macos-latest
             test: true
             cross: false
-          # waiting for approval 
-          # - target: aarch64-apple-darwin
-          #   os: macos-11
-          #   test: true
-          #   cross: false
+          - target: aarch64-apple-darwin
+            os: macos-11
+            test: true
+            cross: false
           # windows: with cross on ubuntu
           - target: aarch64-pc-windows-msvc
             os: windows-latest
