@@ -90,7 +90,8 @@ impl Drop for AppFinalizeHandler {
 // 0: disabled, some error caused
 // 1: enabled, some error caused
 // 2: uninitialized, no error caused
-static PATCHING_ERR_DETAILS_ENABLED: std::sync::atomic::AtomicU8 = std::sync::atomic::AtomicU8::new(2);
+static PATCHING_ERR_DETAILS_ENABLED: std::sync::atomic::AtomicU8 =
+    std::sync::atomic::AtomicU8::new(2);
 
 fn error_caused_but_details_not_enabled() -> bool {
     use std::sync::atomic::Ordering;
@@ -111,7 +112,7 @@ fn patching_err_details() -> bool {
             PATCHING_ERR_DETAILS_ENABLED.store(if stat { 1 } else { 0 }, Ordering::Release);
             stat
         }
-        _ => panic!("invalid PATCHING_ERR_DETAILS_ENABLED")
+        _ => panic!("invalid PATCHING_ERR_DETAILS_ENABLED"),
     }
 }
 
@@ -138,8 +139,8 @@ macro_rules! handle_err {
                 if patching_err_details() {
                     eprintln!("error details: {:?}", &$i);
                 }
-                return $blk
-            },
+                return $blk;
+            }
         }
     };
     ($val: expr => $blk: expr) => {
@@ -149,8 +150,8 @@ macro_rules! handle_err {
                 if patching_err_details() {
                     eprintln!("error details: {:?}", &err);
                 }
-                return $blk
-            },
+                return $blk;
+            }
         }
     };
 }
