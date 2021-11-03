@@ -123,8 +123,13 @@ mod test {
 
     #[test]
     fn from_project_root_serialize_deserialize() {
-        assert_tokens(&RelativePathFromProjectRoot("build/patching-mod/mods/rtm/realtrainmod-2.4.22-unmodifieds.jar".into()), &[
-            Token::Str("build/patching-mod/mods/rtm/realtrainmod-2.4.22-unmodifieds.jar"),
-        ])
+        assert_tokens(
+            &RelativePathFromProjectRoot(
+                "build/patching-mod/mods/rtm/realtrainmod-2.4.22-unmodifieds.jar".into(),
+            ),
+            &[Token::Str(
+                "build/patching-mod/mods/rtm/realtrainmod-2.4.22-unmodifieds.jar",
+            )],
+        )
     }
 }
