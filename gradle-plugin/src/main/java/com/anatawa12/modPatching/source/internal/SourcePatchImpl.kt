@@ -7,11 +7,13 @@ import com.anatawa12.modPatching.common.internal.FreezableContainer
 import com.anatawa12.modPatching.internal.*
 import com.anatawa12.modPatching.source.DeobfuscateSrg
 import com.anatawa12.modPatching.source.ModPatch
+import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILER_CONFIGURATION
 import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILE_MODS
-import com.anatawa12.modPatching.source.internal.SourceConstants.FORGEFLOWER_CONFIGURATION
 import com.anatawa12.modPatching.source.internal.SourceConstants.MAPPING_CONFIGURATION
 import org.gradle.api.tasks.JavaExec
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.provideDelegate
 
 class SourcePatchImpl(
     override val mod: AbstractDownloadingMod,
@@ -60,7 +62,7 @@ class SourcePatchImpl(
 
         val decompileTask = project.tasks.create(decompileTaskName, JavaExec::class) {
             dependsOn(deobfTaskName, mod.downloadTaskName)
-            classpath = project.configurations.getByName(FORGEFLOWER_CONFIGURATION)
+            classpath = project.configurations.getByName(DECOMPILER_CONFIGURATION)
 
             // always use \n for eol char
             systemProperty("line.separator", "\n")
