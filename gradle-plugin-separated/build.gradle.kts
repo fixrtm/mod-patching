@@ -1,4 +1,5 @@
 plugins {
+    id("com.anatawa12.compile-time-constant")
     id("com.github.johnrengelman.shadow")
     `java-library`
     kotlin("jvm")
@@ -45,6 +46,15 @@ tasks.shadowJar {
     relocate("org.intellij.lang.annotations.", "$basePkg.ij_ann.")
     relocate("org.jetbrains.annotations.", "$basePkg.jb_ann.")
     relocate("io.sigpipe.jbsdiff.", "$basePkg.jbsdiff.")
+}
+
+tasks.createCompileTimeConstant {
+    constantsClass = "com.anatawa12.modPatching.internal.SepConstants"
+    values(
+        mapOf(
+            "DO_NOT_EDIT_HEADER" to file("do-not-edit-header.txt").readText(),
+        )
+    )
 }
 
 tasks.build.get().dependsOn(tasks.shadowJar.get())

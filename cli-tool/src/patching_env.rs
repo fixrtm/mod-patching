@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::env::current_dir;
 use std::fs::File;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use quick_error::quick_error;
@@ -10,6 +11,7 @@ use serde::de::DeserializeOwned;
 use serde_yaml::{from_reader, to_writer};
 use zip::ZipArchive;
 
+use crate::DO_NOT_EDIT_HEADER;
 use crate::ext::*;
 use crate::types::{RelativePathFromCacheRoot, RelativePathFromProjectRoot};
 
@@ -271,6 +273,8 @@ fn write_yaml(
     path: &'static &'static str,
     value: &impl Serialize,
 ) -> Result<(), PatchingEnvError> {
-    to_writer(File::create(root.join(*path)).at(*path)?.buf_write(), value).at(path)?;
+    let mut writer = File::create(root.join(*path)).at(*path)?.buf_write();
+    write!(writer, "{}", DO_NOT_EDIT_HEADER).at(*path)?;
+    to_writer(&mut writer, value).at(path)?;
     Ok(())
 }

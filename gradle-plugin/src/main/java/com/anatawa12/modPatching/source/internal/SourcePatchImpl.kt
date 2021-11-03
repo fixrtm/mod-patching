@@ -5,6 +5,7 @@ import com.anatawa12.modPatching.common.internal.CommonUtil
 import com.anatawa12.modPatching.common.internal.Delegates
 import com.anatawa12.modPatching.common.internal.FreezableContainer
 import com.anatawa12.modPatching.internal.*
+import com.anatawa12.modPatching.internal.Constants.DO_NOT_EDIT_HEADER
 import com.anatawa12.modPatching.source.DeobfuscateSrg
 import com.anatawa12.modPatching.source.ModPatch
 import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILER_CONFIGURATION
@@ -106,7 +107,10 @@ class SourcePatchImpl(
 
         patchDirPath.asFile(project)
             .resolve(".gitattributes")
-            .writeText("*.java.patch text eol=lf\n" +
-                    ".gitattributes text eol=lf\n")
+            .writeText(
+                DO_NOT_EDIT_HEADER +
+                        "*.java.patch text eol=lf\n" +
+                        ".gitattributes text eol=lf\n"
+            )
     }
 }
