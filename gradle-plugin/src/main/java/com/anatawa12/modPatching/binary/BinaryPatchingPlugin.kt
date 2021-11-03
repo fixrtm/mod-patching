@@ -46,7 +46,7 @@ open class BinaryPatchingPlugin : Plugin<Project> {
         val copyModifiedClasses = project.tasks.create(COPY_MODIFIED_CLASSES, Sync::class) {
             dependsOn(jarTask, listModifiedClasses)
             into(Util.getBuildPath(project, "modified"))
-            from(jarTask.archiveFile) {
+            from(project.provider { project.zipTree(jarTask.archiveFile) }) {
                 include { listModifiedClasses.isModified(it.path) }
             }
         }
