@@ -83,13 +83,17 @@ plugins {
     id("com.anatawa12.mod-patching.source") version "2.0.2"
 }
 
+dependencies {
+    // forgeFlower compatible decompiler. it should not have dependencies
+    // because it will be launched via java -jar
+    modPatchingDecompiler("net.minecraftforge:forgeflower:1.5.498.12")
+}
+
 sourcePatching {
     // the name of mcp mapping.
     mappingName = "stable_39"
     // the mapping mc version.
     mcVersion = "1.12"
-    // the version of forgeFlower, decompiler
-    forgeFlowerVersion = "1.5.498.12"
     // true if you want to install pm.* utilities automatically
     autoInstallCli = true
     // the mod instance by common
