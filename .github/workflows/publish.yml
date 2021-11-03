@@ -50,6 +50,7 @@ jobs:
           git tag "v$VERSION"
 
           git push -u origin releasing
+          git push -u origin "v$VERSION"
 
   build-rust:
     needs: [ version-up ]
@@ -196,7 +197,7 @@ jobs:
           git push
           # clone master
           git config --add remote.origin.fetch +refs/heads/master:refs/remotes/origin/master
-          git fetch --depth 1 origin master
+          git fetch --depth 4 origin master
           git switch master
           git reset --hard releasing
           git push -u origin master
