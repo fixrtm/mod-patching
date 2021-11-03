@@ -11,10 +11,12 @@ use zip::{ZipArchive, ZipWriter};
 
 use select::Selector;
 
+use crate::collector::AndCollector;
 use crate::doing_error::*;
 use crate::ext::*;
 use crate::patching_env::{parse_pathing_env, PatchingEnv};
 
+mod collector;
 mod doing_error;
 mod ext;
 mod patching_env;
@@ -319,28 +321,41 @@ fn command_add_modify() -> Result<(), Box<dyn std::error::Error>> {
 fn command_apply_patches() -> Result<(), Box<dyn std::error::Error>> {
     let env = parse_pathing_env()?;
 
-    env.mod_names()
+    let succeed = env
+        .mod_names()
         .into_iter()
         .par_bridge()
         .map(|mod_name| apply_patches(&env, mod_name))
-        .collect::<()>();
+        .collect::<AndCollector>()
+        .0;
 
-    Ok(())
+    if !succeed {
+        Err("apply patches failed".into())
+    } else {
+        Ok(())
+    }
 }
 
 fn command_create_diff() -> Result<(), Box<dyn std::error::Error>> {
     let env = parse_pathing_env()?;
 
-    env.mod_names()
+    let succeed = env
+        .mod_names()
         .into_iter()
         .par_bridge()
         .map(|mod_name| create_diff(&env, mod_name))
-        .collect::<()>();
+        .collect::<AndCollector>()
+        .0;
 
-    Ok(())
+    if !succeed {
+        Err("create diff failed".into())
+    } else {
+        Ok(())
+    }
 }
 
-fn apply_patches(env: &PatchingEnv, mod_name: impl AsRef<str>) {
+// returns succeed
+fn apply_patches(env: &PatchingEnv, mod_name: impl AsRef<str>) -> bool {
     let mod_name = mod_name.as_ref();
 
     let formatter = PatchFormatter::new();
@@ -349,6 +364,7 @@ fn apply_patches(env: &PatchingEnv, mod_name: impl AsRef<str>) {
         .map_err(Into::into)
         .and_then(|x| ZipArchive::new(x.buf_read())) => {
         eprintln!("ERROR: no source jar found for {}! broken workspace or not prepared!", mod_name);
+        false
     });
     let patch_root = env.get_patch_path(mod_name);
     let source_root = env.get_source_path(mod_name);
@@ -382,6 +398,8 @@ fn apply_patches(env: &PatchingEnv, mod_name: impl AsRef<str>) {
     remake_unmodified_classes_jar(&env, &mod_name)
         .doing("creating unmodified classes jar file")
         .unwrap();
+
+    true
 }
 
 fn read_to_vec(capacity: usize, read: impl Read) -> std::io::Result<Vec<u8>> {
@@ -477,7 +495,7 @@ fn remake_unmodified_classes_jar(env: &PatchingEnv, mod_name: &str) -> std::io::
     Ok(())
 }
 
-fn create_diff(env: &PatchingEnv, mod_name: impl AsRef<str>) {
+fn create_diff(env: &PatchingEnv, mod_name: impl AsRef<str>) -> bool {
     let mod_name = mod_name.as_ref();
 
     let formatter = PatchFormatter::new().with_space_on_empty_line();
@@ -485,6 +503,7 @@ fn create_diff(env: &PatchingEnv, mod_name: impl AsRef<str>) {
     let mut sources_jar = handle_err!(File::open(env.get_source_jar_path(mod_name)).map_err(Into::into)
         .and_then(|x| ZipArchive::new(x.buf_read())) => {
         eprintln!("ERROR: no source jar found for {}! broken workspace or not prepared!", mod_name);
+        false
     });
     let patch_root = env.get_patch_path(mod_name);
     let source_root = env.get_source_path(mod_name);
@@ -513,7 +532,8 @@ fn create_diff(env: &PatchingEnv, mod_name: impl AsRef<str>) {
                 &patch_root,
             )
         })
-        .collect::<()>();
+        .collect::<AndCollector>()
+        .0
 }
 
 fn create_diff_for(
@@ -523,7 +543,7 @@ fn create_diff_for(
     src: &[u8],
     source_root: &Path,
     patch_root: &Path,
-) {
+) -> bool {
     let java_path = source_root.join(&file_name);
     let patch_path = patch_root.join(&format!("{}.patch", &file_name));
 
@@ -533,6 +553,7 @@ fn create_diff_for(
 
     let java_file = handle_err!(File::open(&java_path).and_then(|x| read_to_vec(patch_size as usize, x)) => {
         eprintln!("ERROR: no source code found for {}! broken workspace!", class_name);
+        false
     });
 
     let patch = DiffOptions::default()
@@ -543,10 +564,14 @@ fn create_diff_for(
 
     let mut patch_file = handle_err!(create_file_with_dir(patch_path) => |e| {
         eprintln!("ERROR: can't create patch file for {}: {}", class_name, e);
+        false
     })
-    .buf_write();
+        .buf_write();
 
     handle_err!(formatter.write_patch_into(&patch, &mut patch_file).and_then(|_| patch_file.flush()) => |e| {
         eprintln!("ERROR: writing patch file for {}: {}", class_name, e);
+        false
     });
+
+    true
 }
