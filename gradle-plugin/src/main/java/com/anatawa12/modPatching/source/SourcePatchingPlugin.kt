@@ -5,15 +5,16 @@ import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_PATCHIN
 import com.anatawa12.modPatching.internal.Constants.VERSION_NAME
 import com.anatawa12.modPatching.internal.PatchingDir
 import com.anatawa12.modPatching.source.internal.*
+import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILER_CONFIGURATION
 import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILE_MODS
-import com.anatawa12.modPatching.source.internal.SourceConstants.FORGEFLOWER_CONFIGURATION
 import com.anatawa12.modPatching.source.internal.SourceConstants.INSTALL_SOURCE_UTIL_GLOBALLY
 import com.anatawa12.modPatching.source.internal.SourceConstants.INSTALL_SOURCE_UTIL_LOCALLY
 import com.anatawa12.modPatching.source.internal.SourceConstants.MAPPING_CONFIGURATION
 import com.anatawa12.modPatching.source.internal.SourceConstants.MOD_PATCHING_SOURCE_UTIL_CLI_CONFIGURATION
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.create
 import java.io.File
 
 @Suppress("unused")
@@ -28,7 +29,7 @@ open class SourcePatchingPlugin : Plugin<Project> {
         patches.all { (this as? SourcePatchImpl)?.onAdd(patchingDir) }
 
         project.configurations.maybeCreate(MAPPING_CONFIGURATION)
-        project.configurations.maybeCreate(FORGEFLOWER_CONFIGURATION)
+        project.configurations.maybeCreate(DECOMPILER_CONFIGURATION)
         project.configurations.maybeCreate(MOD_PATCHING_SOURCE_UTIL_CLI_CONFIGURATION)
 
         project.dependencies.add(
@@ -38,13 +39,6 @@ open class SourcePatchingPlugin : Plugin<Project> {
                         ":mcp_${patches.mappingChannel}" +
                         ":${patches.mappingVersion}-${patches.mcVersion}" +
                         "@zip"
-            },
-        )
-
-        project.dependencies.add(
-            FORGEFLOWER_CONFIGURATION,
-            project.provider {
-                "net.minecraftforge:forgeflower:${patches.forgeFlowerVersion}"
             },
         )
 

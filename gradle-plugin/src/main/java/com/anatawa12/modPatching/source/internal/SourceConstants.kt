@@ -6,6 +6,6 @@ object SourceConstants {
     val INSTALL_SOURCE_UTIL_GLOBALLY = "installSourceUtilGlobally"
 
     val MAPPING_CONFIGURATION = "modPatchingMapping"
-    val FORGEFLOWER_CONFIGURATION = "modPatchingForgeFlower"
+    val DECOMPILER_CONFIGURATION = "modPatchingDecompiler"
     val MOD_PATCHING_SOURCE_UTIL_CLI_CONFIGURATION = "modPatchingSourceUtilCli"
 }
