@@ -78,6 +78,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     })
 }
 
+const DO_NOT_EDIT_HEADER: &'static str = include_str!("./do-not-edit-header.txt");
+
 struct AppFinalizeHandler;
 
 impl Drop for AppFinalizeHandler {
@@ -243,6 +245,7 @@ fn command_reformat_yaml(mut args: Args) -> Result<(), Box<dyn std::error::Error
             writer: BufWriter::new(&mut file),
             err: None,
         };
+        write!(writer.writer, "{}", DO_NOT_EDIT_HEADER)?;
         for x in &body {
             check_err(YamlEmitter::new(&mut writer).dump(x), &mut writer)?;
             check_err(writer.write_char('\n'), &mut writer)?;

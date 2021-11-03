@@ -103,10 +103,5 @@ class SourcePatchImpl(
             deobfJar = deobfJarPath,
         )
         patchingDir.save(yamlReformat(project), CommonUtil.getCacheBase(project))
-
-        patchDirPath.asFile(project)
-            .resolve(".gitattributes")
-            .writeText("*.java.patch text eol=lf\n" +
-                    ".gitattributes text eol=lf\n")
     }
 }

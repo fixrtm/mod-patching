@@ -1,5 +1,6 @@
 package com.anatawa12.modPatching.internal
 
+import com.anatawa12.modPatching.internal.SepConstants.DO_NOT_EDIT_HEADER
 import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -29,9 +30,13 @@ class PatchingDir private constructor(val root: File) {
             root.resolve("local.yaml").writeText(Yaml.default.encodeToString(LocalConfig.serializer(), local))
             root.resolve("main.yaml").writeText(Yaml.default.encodeToString(PatchingMainConfig.serializer(), main))
             root.resolve(".gitattributes")
-                .writeText("*.yaml text eol=lf\n" +
-                        ".gitattributes text eol=lf\n")
-            root.resolve(".gitignore").writeText("local.yaml\n.gitignore\n")
+                .writeText(
+                    DO_NOT_EDIT_HEADER +
+                            "*.yaml text eol=lf\n" +
+                            ".gitattributes text eol=lf\n"
+                )
+            root.resolve(".gitignore").writeText("${DO_NOT_EDIT_HEADER}local.yaml\n.gitignore\n")
+            yamlFormatter.accept(root.resolve("local.yaml"))
             yamlFormatter.accept(root.resolve("main.yaml"))
         } catch (e: Exception) {
             e.printStackTrace()
