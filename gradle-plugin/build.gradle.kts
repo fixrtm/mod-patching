@@ -93,12 +93,7 @@ tasks.withType<PublishToMavenRepository>().configureEach {
 
 tasks.createCompileTimeConstant {
     constantsClass = "com.anatawa12.modPatching.internal.Constants"
-    values(
-        mapOf(
-            "VERSION_NAME" to project.version.toString(),
-            "DO_NOT_EDIT_HEADER" to file("do-not-edit-header.txt").readText(),
-        )
-    )
+    values(mapOf("VERSION_NAME" to project.version.toString()))
 }
 
 java {
