@@ -50,6 +50,7 @@ jobs:
           git tag "v$VERSION"
 
           git push -u origin releasing
+          git push -u origin "v$VERSION"
 
   build-rust:
     needs: [ version-up ]
