@@ -8,6 +8,7 @@ import com.anatawa12.modPatching.source.internal.SourceConstants.DECOMPILER_CONF
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.*
 
 class SourcePatchingExtension(private val project: Project) :
     SourcePatchContainer,
@@ -36,6 +37,22 @@ class SourcePatchingExtension(private val project: Project) :
     override var autoInstallCli: Boolean = false
     val mappingChannel get() = mappingName.substringBefore('_')
     val mappingVersion get() = mappingName.substringAfter('_')
+
+    internal val decompilerIdentifier: String
+        get() {
+            return if (dependencyAdded) {
+                forgeFlowerVersion
+            } else {
+                val configuration = project.configurations[DECOMPILER_CONFIGURATION]
+                val artifacts = configuration.incoming.artifacts.iterator()
+
+                if (!artifacts.hasNext()) error("please configure $DECOMPILER_CONFIGURATION before this line.")
+                val artifact = artifacts.next()
+                if (artifacts.hasNext()) error("please do not configure two or more dependencies for $DECOMPILER_CONFIGURATION.")
+
+                artifact.id.displayName.hashCode().toString(16).padStart(32 / 4, '0')
+            }
+        }
 
     override fun patch(mod: DownloadingMod, block: Action<ModPatch>): ModPatch {
         require(mod is AbstractDownloadingMod) { "unsupported DownloadingMod: $mod" }
