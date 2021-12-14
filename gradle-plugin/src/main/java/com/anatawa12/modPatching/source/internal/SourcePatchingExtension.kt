@@ -50,8 +50,7 @@ class SourcePatchingExtension(private val project: Project) :
                 val artifact = artifacts.next()
                 if (artifacts.hasNext()) error("please do not configure two or more dependencies for $DECOMPILER_CONFIGURATION.")
 
-                val id = artifact.id.displayName.hashCode().toString(16).padStart(32 / 4, '0')
-                "resolved-decompiler-$id"
+                artifact.id.displayName.hashCode().toString(16).padStart(32 / 4, '0')
             }
         }
 
