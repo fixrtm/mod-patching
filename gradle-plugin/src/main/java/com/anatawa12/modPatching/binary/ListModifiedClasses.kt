@@ -1,6 +1,6 @@
 package com.anatawa12.modPatching.binary
 
-import com.anatawa12.modPatching.binary.internal.readFully
+import com.anatawa12.modPatching.binary.internal.isSameDataStream
 import com.anatawa12.modPatching.source.internal.readTextOr
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFile
@@ -65,30 +65,6 @@ open class ListModifiedClasses : DefaultTask() {
 
     private fun write(file: RegularFile, body: String) {
         file.asFile.apply { parentFile.mkdirs() }.writeText(body)
-    }
-
-    private fun isSameDataStream(head: InputStream, streams: List<InputStream>): Boolean {
-        if (streams.isEmpty()) return true
-
-        val buf0 = ByteArray(1024)
-        val buf1 = ByteArray(1024)
-        var size0: Int
-        var size1: Int
-        while (true) {
-            size0 = head.readFully(buf0)
-
-            for (stream1 in streams) {
-                size1 = stream1.readFully(buf1)
-                // size changed (in stream): not same
-                if (size0 != size1) return false
-                for (i in 0 until size0) {
-                    if (buf0[i] != buf1[i]) return false
-                }
-            }
-
-            // all elements are read and same: same stream
-            if (size0 == -1) return true
-        }
     }
 
     private class MultiClose<C : Closeable>(private val internals: List<C>) : Closeable, List<C> by internals {
