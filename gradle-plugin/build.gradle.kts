@@ -34,10 +34,11 @@ dependencies {
     implementation("org.ow2.asm:asm-tree:9.2")
     implementation("org.snakeyaml:snakeyaml-engine:2.3")
 
-    testImplementation(platform("io.kotest:kotest-bom:5.0.3"))
+    testImplementation(platform("io.kotest:kotest-bom:4.6.3"))
     testImplementation("io.kotest:kotest-framework-api")
     testImplementation("io.kotest:kotest-assertions-core")
-    testRuntimeOnly(platform("io.kotest:kotest-bom:5.0.3"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
+    testRuntimeOnly(platform("io.kotest:kotest-bom:4.6.3"))
     testRuntimeOnly("io.kotest:kotest-runner-junit5")
 }
 
