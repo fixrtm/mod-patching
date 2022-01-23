@@ -32,20 +32,26 @@ fun InputStream.readFully(buf: ByteArray): Int {
     return cursor// == buf.size
 }
 
-fun isSameDataStream(stream0: InputStream, stream1: InputStream): Boolean {
+fun isSameDataStream(head: InputStream, streams: List<InputStream>): Boolean {
+    if (streams.isEmpty()) return true
+
     val buf0 = ByteArray(1024)
     val buf1 = ByteArray(1024)
     var size0: Int
     var size1: Int
     while (true) {
-        size0 = stream0.readFully(buf0)
-        size1 = stream1.readFully(buf1)
-        // size changed (in stream): not same
-        if (size0 != size1) return false
+        size0 = head.readFully(buf0)
+
+        for (stream1 in streams) {
+            size1 = stream1.readFully(buf1)
+            // size changed (in stream): not same
+            if (size0 != size1) return false
+            for (i in 0 until size0) {
+                if (buf0[i] != buf1[i]) return false
+            }
+        }
+
         // all elements are read and same: same stream
         if (size0 == -1) return true
-        for (i in 0 until size0) {
-            if (buf0[i] != buf1[i]) return false
-        }
     }
 }
