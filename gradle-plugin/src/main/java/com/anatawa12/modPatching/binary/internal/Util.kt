@@ -26,9 +26,10 @@ fun InputStream.readFully(buf: ByteArray): Int {
     var cursor = 0
     while (cursor != buf.size) {
         val read = read(buf, cursor, buf.size - cursor)
-        if (read == -1) return -1
+        if (read == -1) break
         cursor += read
     }
+    if (cursor == 0) return -1
     return cursor// == buf.size
 }
 
