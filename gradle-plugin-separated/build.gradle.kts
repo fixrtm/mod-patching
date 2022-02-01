@@ -21,7 +21,7 @@ dependencies {
     implementation("com.charleskorn.kaml:kaml:0.40.0") {
         exclude("org.snakeyaml")
     }
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
 
     // libraries which I'll use: on classpath
