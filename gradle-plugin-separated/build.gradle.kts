@@ -22,7 +22,7 @@ dependencies {
         exclude("org.snakeyaml")
     }
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 
     // libraries which I'll use: on classpath
     shadow("org.apache.httpcomponents:httpclient:4.5.13")
