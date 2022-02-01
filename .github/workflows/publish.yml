@@ -183,7 +183,7 @@ jobs:
         with:
           token: "${{ secrets.ACTIONS_PAT }}"
           ref: releasing
-          depth: 2
+          fetch-depth: 2
       - uses: anatawa12/something-releaser@v2
       - run: set-git-user anatawa12-bot
 
