@@ -18,7 +18,7 @@ dependencies {
     compileOnly("org.slf4j:slf4j-api:1.7.32")
     // possible package name duplicate so shades
     implementation("com.anatawa12.jbsdiff:jbsdiff:1.0")
-    implementation("com.charleskorn.kaml:kaml:0.40.0") {
+    implementation("com.charleskorn.kaml:kaml:0.44.0") {
         exclude("org.snakeyaml")
     }
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2")
