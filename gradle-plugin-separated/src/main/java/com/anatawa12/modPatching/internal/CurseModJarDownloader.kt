@@ -4,6 +4,7 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClientBuilder
 import java.io.File
 import java.io.IOException
+import java.net.URLEncoder
 
 object CurseModJarDownloader {
     fun download(
@@ -32,7 +33,9 @@ object CurseModJarDownloader {
 
         println("file name is: ${file.displayName}, id: ${file.id}")
 
-        val downloadUrl = ForgeSvcApi.getFileInfo(client, project.id, file.id).downloadUrl
+        val downloadUrl = "https://edge.forgecdn.net/files/" +
+                "${file.id}".chunked(4).joinToString("/") + "/" +
+                URLEncoder.encode(file.displayName, "UTF-8")
 
         val request = HttpGet(downloadUrl)
         client.execute(request).use { response ->
