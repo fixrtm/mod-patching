@@ -9,7 +9,7 @@ object ForgeSvcApi {
         val req = HttpGet("https://addons-ecs.forgesvc.net/api/v2/addon/$project/file/$file")
         client.execute(req).use { res ->
             if (res.statusLine.statusCode !in 200 until 300)
-                throw IOException("unexpected code: $res")
+                throw IOException("unexpected response code: \n\t\trequrest: $req\n\t\t$res")
             return Json.decodeFromString(ForgeSvcFile.serializer(),
                 res.entity.content.reader().buffered().use { it.readText() })
         }

@@ -34,9 +34,10 @@ object CurseModJarDownloader {
 
         val downloadUrl = ForgeSvcApi.getFileInfo(client, project.id, file.id).downloadUrl
 
-        client.execute(HttpGet(downloadUrl)).use { response ->
+        val request = HttpGet(downloadUrl)
+        client.execute(request).use { response ->
             if (response.statusLine.statusCode !in 200 until 300)
-                throw IOException("unexpected code: $response")
+                throw IOException("unexpected response code: \n\t\trequrest: $request\n\t\t$response")
             destniation.parentFile.mkdirs()
 
             response.entity.content.buffered().use { source ->
