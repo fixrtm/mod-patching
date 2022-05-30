@@ -37,7 +37,7 @@ dependencies {
     testImplementation(platform("io.kotest:kotest-bom:4.6.3"))
     testImplementation("io.kotest:kotest-framework-api")
     testImplementation("io.kotest:kotest-assertions-core")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
     testRuntimeOnly(platform("io.kotest:kotest-bom:4.6.3"))
     testRuntimeOnly("io.kotest:kotest-runner-junit5")
 }
