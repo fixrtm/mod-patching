@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     // gradle embedded library
-    compileOnly("org.slf4j:slf4j-api:1.7.36")
+    compileOnly("org.slf4j:slf4j-api:2.0.2")
     // possible package name duplicate so shades
     implementation("com.anatawa12.jbsdiff:jbsdiff:1.0")
     implementation("com.charleskorn.kaml:kaml:0.46.0") {
