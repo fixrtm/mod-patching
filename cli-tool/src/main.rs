@@ -28,7 +28,7 @@ macro_rules! execution {
         match $expr {
             "add-modify" => return command_add_modify(),
             "apply-patches" => return command_apply_patches(),
-            "create-diff" => return command_create_diff(),
+            "create-diff" => return command_create_diff($args),
             "reformat-yaml" => return command_reformat_yaml($args),
             "--help" | "help" => return command_help(),
             $name => $els,
@@ -339,14 +339,23 @@ fn command_apply_patches() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-fn command_create_diff() -> Result<(), Box<dyn std::error::Error>> {
+fn command_create_diff(args: Args) -> Result<(), Box<dyn std::error::Error>> {
     let env = parse_pathing_env()?;
+    let mut check_mode = false;
+
+    // parse args
+    for arg in args {
+        match arg.as_str() {
+            "--check" => check_mode = true,
+            _ => return Err(format!("invalid arg: {}", arg).into()),
+        }
+    }
 
     let succeed = env
         .mod_names()
         .into_iter()
         .par_bridge()
-        .map(|mod_name| create_diff(&env, mod_name))
+        .map(|mod_name| create_diff(&env, mod_name, check_mode))
         .collect::<AndCollector>()
         .0;
 
@@ -498,7 +507,7 @@ fn remake_unmodified_classes_jar(env: &PatchingEnv, mod_name: &str) -> std::io::
     Ok(())
 }
 
-fn create_diff(env: &PatchingEnv, mod_name: impl AsRef<str>) -> bool {
+fn create_diff(env: &PatchingEnv, mod_name: impl AsRef<str>, check_mode: bool) -> bool {
     let mod_name = mod_name.as_ref();
 
     let formatter = PatchFormatter::new().with_space_on_empty_line();
@@ -533,6 +542,7 @@ fn create_diff(env: &PatchingEnv, mod_name: impl AsRef<str>) -> bool {
                 &src,
                 &source_root,
                 &patch_root,
+                check_mode,
             )
         })
         .collect::<AndCollector>()
@@ -546,6 +556,7 @@ fn create_diff_for(
     src: &[u8],
     source_root: &Path,
     patch_root: &Path,
+    check_mode: bool,
 ) -> bool {
     let java_path = source_root.join(&file_name);
     let patch_path = patch_root.join(&format!("{}.patch", &file_name));
@@ -565,16 +576,33 @@ fn create_diff_for(
         .with_original(format!("a/{}", file_name).into_bytes())
         .with_modified(format!("b/{}", file_name).into_bytes());
 
-    let mut patch_file = handle_err!(create_file_with_dir(patch_path) => |e| {
-        eprintln!("ERROR: can't create patch file for {}: {}", class_name, e);
-        false
-    })
-        .buf_write();
+    if check_mode {
+        let mut generated = Vec::<u8>::new();
+        formatter.write_patch_into(&patch, &mut generated).unwrap();
+        let existing = handle_err!(File::open(patch_path).and_then(|mut x| {
+            let mut vec = Vec::<u8>::new();
+            x.read_to_end(&mut vec)?;
+            Ok(vec)
+        }) => |e| {
+            eprintln!("ERROR: can't read existing patch file for {}: {}", class_name, e);
+            false
+        });
+        if generated != existing {
+            eprintln!("ERROR: patch file is changed {}", class_name);
+            return false
+        }
+    } else {
+        let mut patch_file = handle_err!(create_file_with_dir(patch_path) => |e| {
+            eprintln!("ERROR: can't create patch file for {}: {}", class_name, e);
+            false
+        })
+            .buf_write();
 
-    handle_err!(formatter.write_patch_into(&patch, &mut patch_file).and_then(|_| patch_file.flush()) => |e| {
-        eprintln!("ERROR: writing patch file for {}: {}", class_name, e);
-        false
-    });
+        handle_err!(formatter.write_patch_into(&patch, &mut patch_file).and_then(|_| patch_file.flush()) => |e| {
+            eprintln!("ERROR: writing patch file for {}: {}", class_name, e);
+            false
+        });
+    }
 
     true
 }
