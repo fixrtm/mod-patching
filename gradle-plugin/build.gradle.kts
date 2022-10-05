@@ -30,7 +30,7 @@ dependencies {
 
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
     implementation("org.ow2.asm:asm:9.3")
-    implementation("org.ow2.asm:asm-commons:9.3")
+    implementation("org.ow2.asm:asm-commons:9.4")
     implementation("org.ow2.asm:asm-tree:9.3")
     implementation("org.snakeyaml:snakeyaml-engine:2.5")
 
