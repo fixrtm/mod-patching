@@ -149,7 +149,7 @@ impl<'a, S: AsRef<str>, W: std::io::Write> Selector<'a, S, W> {
                 .queue(terminal::Clear(terminal::ClearType::CurrentLine))?
                 .queue(style::Print(if i == self.selecting { "> " } else { "  " }))?
                 .queue(style::Print(line.as_ref()))?
-                .queue(style::Print("\n"))?
+                .queue(style::Print("\r\n"))?
                 .queue(cursor::MoveToColumn(0))?;
         }
         self.tty
