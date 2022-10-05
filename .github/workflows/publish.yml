@@ -65,7 +65,7 @@ jobs:
             test: true
             cross: false
           - target: aarch64-apple-darwin
-            os: macos-11
+            os: macos-latest
             test: true
             cross: false
           # windows: with cross on ubuntu
