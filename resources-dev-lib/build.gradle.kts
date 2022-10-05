@@ -30,7 +30,7 @@ dependencies {
     }
 
     // the asm
-    compileOnly("org.ow2.asm:asm:9.3")
+    compileOnly("org.ow2.asm:asm:9.4")
 }
 
 java {
