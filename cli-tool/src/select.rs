@@ -109,6 +109,11 @@ impl<'a, S: AsRef<str>, W: std::io::Write> Selector<'a, S, W> {
                 _ => {}
             },
             Event::Resize(_, _) => self.draw()?,
+            Event::FocusGained => {}
+            Event::FocusLost => {}
+            Event::Paste(ref pasted) => {
+                self.inputting.push_str(pasted)
+            }
         }
         Ok(None)
     }
@@ -209,7 +214,7 @@ impl<'a, S: AsRef<str>, W: std::io::Write> Selector<'a, S, W> {
                 self.draw()?;
             }
             KeyCode::Char(c) => {
-                self.inputting.insert(self.inputting.len(), c);
+                self.inputting.push(c);
                 self.input_changed();
                 self.draw()?;
             }
