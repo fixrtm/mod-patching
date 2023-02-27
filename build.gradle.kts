@@ -1,7 +1,7 @@
 plugins {
     id("com.anatawa12.compile-time-constant") version "1.0.5" apply false
     id("com.gradle.plugin-publish") version "0.21.0" apply false
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.github.johnrengelman.shadow") version "8.0.0"
     kotlin("jvm") version "1.7.20" apply false
     kotlin("plugin.serialization") version "1.7.20" apply false
 }
