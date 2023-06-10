@@ -103,7 +103,6 @@ class SourcePatchImpl(
             sourceJar = sourcesJarPath,
             deobfJar = deobfJarPath,
         )
-        patchingDir.save(yamlReformat(project), CommonUtil.getCacheBase(project))
 
         patchDirPath.asFile(project)
             .resolve(".gitattributes")
