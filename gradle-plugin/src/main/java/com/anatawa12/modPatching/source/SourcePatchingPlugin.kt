@@ -2,6 +2,7 @@ package com.anatawa12.modPatching.source
 
 import com.anatawa12.modPatching.common.ModPatchingCommonPlugin
 import com.anatawa12.modPatching.common.internal.CommonConstants.PREPARE_PATCHING_ENVIRONMENT
+import com.anatawa12.modPatching.common.internal.CommonUtil
 import com.anatawa12.modPatching.internal.Constants.VERSION_NAME
 import com.anatawa12.modPatching.internal.PatchingDir
 import com.anatawa12.modPatching.source.internal.*
@@ -27,6 +28,11 @@ open class SourcePatchingPlugin : Plugin<Project> {
         val patches = SourcePatchingExtension(project)
         project.extensions.add(SourcePatchContainer::class.java, "sourcePatching", patches)
         patches.all { (this as? SourcePatchImpl)?.onAdd(patchingDir) }
+
+        // to avoid conflict with ForgeGradle 6.x, save on afterEvaluate
+        project.afterEvaluate {
+            patchingDir.save(yamlReformat(project), CommonUtil.getCacheBase(project))
+        }
 
         project.configurations.maybeCreate(MAPPING_CONFIGURATION)
         project.configurations.maybeCreate(DECOMPILER_CONFIGURATION)
