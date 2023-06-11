@@ -95,7 +95,7 @@ publishing.publications.create<MavenPublication>("maven") {
 }
 
 tasks.withType<AbstractPublishToMaven>().configureEach {
-    onlyIf { !publication.name.endsWith("PluginMarkerMaven") }
+    onlyIf { !publication.name.endsWith("PluginMarkerMaven") && publication.name != "pluginMaven" }
 }
 
 tasks.createCompileTimeConstant {
