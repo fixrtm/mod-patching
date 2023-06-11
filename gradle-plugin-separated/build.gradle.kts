@@ -25,7 +25,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
 
     // libraries which I'll use: on classpath
-    shadow("org.apache.httpcomponents:httpclient:4.5.13")
+    shadow("org.apache.httpcomponents:httpclient:4.5.14")
     shadow("org.ow2.asm:asm:9.5")
     shadow("org.ow2.asm:asm-commons:9.5")
     shadow("org.ow2.asm:asm-tree:9.5")
