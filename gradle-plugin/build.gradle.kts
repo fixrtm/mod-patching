@@ -5,7 +5,6 @@ plugins {
     `java-gradle-plugin`
     kotlin("jvm")
     `maven-publish`
-    signing
 }
 
 evaluationDependsOn(":gradle-plugin-separated")
@@ -52,13 +51,10 @@ tasks.test {
     useJUnitPlatform()
 }
 
-gradlePlugin.isAutomatedPublishing = false
-
 pluginBundle {
     website = "https://github.com/anatawa12/mod-patching#readme"
     vcsUrl = "https://github.com/anatawa12/mod-patching.git"
     description = "the plugin for modifying some mod"
-    mavenCoordinates.groupId = "${project.group}"
     tags = listOf("minecraft", "patch")
 }
 
@@ -98,8 +94,8 @@ publishing.publications.create<MavenPublication>("maven") {
     }
 }
 
-tasks.withType<PublishToMavenRepository>().configureEach {
-    onlyIf { publication.name != "pathingModPluginMarkerMaven" }
+tasks.withType<AbstractPublishToMaven>().configureEach {
+    onlyIf { !publication.name.endsWith("PluginMarkerMaven") }
 }
 
 tasks.createCompileTimeConstant {
