@@ -32,21 +32,18 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          profile: minimal
-          override: true
-          target: ${{ matrix.target }}
-      - uses: actions/setup-java@v2
+          targets: ${{ matrix.target }}
+      - uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
           java-version: '8'
 
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
         with:
           target-dir: cli-tool/build/cargo
 
@@ -80,7 +77,7 @@ jobs:
           RUSTFLAGS: -C target-feature=+crt-static
         run: ./gradlew cli-tool:check -Pcli-tool-target=${{ matrix.target }} -Pcli-tool-cross=${{ steps.vars.outputs.cross }}
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: mod-patching-${{ matrix.target }}
           path: cli-tool/build/cargo/${{ matrix.target }}/release/mod-patching${{ steps.vars.outputs.ext }}

@@ -8,26 +8,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
-      - uses: actions/setup-java@v2
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
           java-version: '8'
 
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
 
       - name: Build
         run: |
           ./gradlew build
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: mod-patching
           path: cli-tool/build/cargo/*/release/mod-patching
