@@ -112,3 +112,8 @@ java {
     withJavadocJar()
     withSourcesJar()
 }
+
+// https://youtrack.jetbrains.com/issue/KT-44893
+compileTimeConstant {
+    alwaysGenerateJarFile = true
+}
