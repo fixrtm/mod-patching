@@ -19,7 +19,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: cli-tool -> cli-tool/build/cargo
+          workspaces: cli-tool -> build/cargo
 
       - name: Build
         run: |

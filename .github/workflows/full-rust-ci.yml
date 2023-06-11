@@ -45,7 +45,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: cli-tool -> cli-tool/build/cargo
+          workspaces: cli-tool -> build/cargo
           key: ${{ matrix.target }}
 
       - name: setup variables
