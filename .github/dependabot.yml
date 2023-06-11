@@ -10,3 +10,7 @@ updates:
     open-pull-requests-limit: 100
     schedule:
       interval: daily
+    ignore:
+      # We have to upgrade this when we upgraded gradle version.
+      - dependency-name: com.github.johnrengelman.shadow
+        update-types: [ "version-update:semver-major" ]
