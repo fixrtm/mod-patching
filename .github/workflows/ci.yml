@@ -18,6 +18,8 @@ jobs:
           java-version: '8'
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: cli-tool -> cli-tool/build/cargo
 
       - name: Build
         run: |
