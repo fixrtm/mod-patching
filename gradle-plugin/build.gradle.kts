@@ -25,7 +25,7 @@ dependencies {
     compileOnly(project(":gradle-plugin-separated")) {
         exclude("org.jetbrains.kotlin")
     }
-    implementation("org.apache.commons:commons-compress:1.21")
+    implementation("org.apache.commons:commons-compress:1.23.0")
     implementation("org.tukaani:xz:1.9")
 
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
