@@ -186,7 +186,7 @@ fn command_help() -> Result<(), Box<dyn std::error::Error>> {
 fn command_reformat_yaml(mut args: Args) -> Result<(), Box<dyn std::error::Error>> {
     use std::fs::OpenOptions;
     use std::io::SeekFrom;
-    use yaml_rust::{YamlEmitter, YamlLoader};
+    use yaml_rust::YamlLoader;
 
     let file_path = args.next().expect("yaml file name expected");
     let mut file = OpenOptions::new().read(true).write(true).open(file_path)?;
@@ -204,54 +204,57 @@ fn command_reformat_yaml(mut args: Args) -> Result<(), Box<dyn std::error::Error
     file.seek(SeekFrom::Start(0))?;
 
     // write
-    {
-        use std::fmt::Write as FmtWrite;
-        use std::{fmt, io};
-        type BoxedErr = Box<dyn std::error::Error>;
+    let mut writer = BufWriter::new(&mut file);
+    write!(writer, "{}", DO_NOT_EDIT_HEADER)?;
+    write_yaml_io(body, &mut writer)?;
+    writer.flush()?;
+    Ok(())
+}
 
-        // bridge between fmt::write and io::Write
-        // with keeping error by io::Write
-        struct FmtToIoWriter<W> {
-            writer: W,
-            err: Option<BoxedErr>,
+fn write_yaml_io(yaml: Vec<yaml_rust::Yaml>, writer: impl Write) -> std::io::Result<()> {
+    use std::{fmt, io};
+
+    // bridge between fmt::write and io::Write
+    // with keeping error by io::Write
+    struct FmtToIoWriter<W> {
+        writer: W,
+        err: Option<io::Error>,
+    }
+    
+    impl<W> FmtToIoWriter<W> {
+
+        fn check_err(&mut self) -> Result<(), io::Error>
+        {
+            self.err.take().map(Err).unwrap_or(Ok(()))
         }
 
-        impl<W> fmt::Write for FmtToIoWriter<W>
-            where
-                W: io::Write,
-        {
-            fn write_str(&mut self, s: &str) -> fmt::Result {
-                match self.writer.write_all(s.as_bytes()) {
-                    Ok(_) => Ok(()),
-                    Err(err) => {
-                        self.err = Some(err.into());
-                        Err(fmt::Error)
-                    }
+    }
+
+    impl<W> fmt::Write for FmtToIoWriter<W>
+        where
+            W: io::Write,
+    {
+        fn write_str(&mut self, s: &str) -> fmt::Result {
+            match self.writer.write_all(s.as_bytes()) {
+                Ok(_) => Ok(()),
+                Err(err) => {
+                    self.err = Some(err);
+                    Err(fmt::Error)
                 }
             }
         }
-
-        fn check_err<V, E, W>(err: Result<V, E>, w: &mut FmtToIoWriter<W>) -> Result<V, BoxedErr>
-            where
-                E: std::error::Error + 'static,
-        {
-            w.err
-                .take()
-                .map(Err)
-                .unwrap_or_else(|| err.map_err(Into::into))
-        }
-
-        let mut writer = FmtToIoWriter {
-            writer: BufWriter::new(&mut file),
-            err: None,
-        };
-        write!(writer.writer, "{}", DO_NOT_EDIT_HEADER)?;
-        for x in &body {
-            check_err(YamlEmitter::new(&mut writer).dump(x), &mut writer)?;
-            check_err(writer.write_char('\n'), &mut writer)?;
-        }
-        writer.writer.flush()?;
     }
+
+    let mut writer = FmtToIoWriter {
+        writer,
+        err: None,
+    };
+    for x in &yaml {
+        yaml_rust::YamlEmitter::new(&mut writer).dump(x).unwrap();
+        writer.check_err()?;
+        write!(writer.writer, "\n")?;
+    }
+    writer.writer.flush()?;
     Ok(())
 }
 
