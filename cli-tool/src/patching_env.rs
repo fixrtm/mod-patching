@@ -8,7 +8,7 @@ use quick_error::quick_error;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde::de::DeserializeOwned;
-use serde_yaml::{from_reader, to_writer};
+use serde_yaml::{from_reader, to_string};
 use zip::ZipArchive;
 
 use crate::DO_NOT_EDIT_HEADER;
@@ -273,8 +273,11 @@ fn write_yaml(
     path: &'static &'static str,
     value: &impl Serialize,
 ) -> Result<(), PatchingEnvError> {
+    let string = to_string(value).expect("serializing");
+    let yaml = yaml_rust::YamlLoader::load_from_str(&string).expect("parsing serde's yaml");
     let mut writer = File::create(root.join(*path)).at(*path)?.buf_write();
     write!(writer, "{}", DO_NOT_EDIT_HEADER).at(*path)?;
-    to_writer(&mut writer, value).at(path)?;
+    super::write_yaml_io(yaml, &mut writer).at(*path)?;
+    writer.flush().at(*path)?;
     Ok(())
 }
