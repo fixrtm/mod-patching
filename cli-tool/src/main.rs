@@ -1,5 +1,5 @@
 use std::env::{args, Args};
-use std::fs::File;
+use std::fs::{File, remove_file};
 use std::io::{BufReader, BufWriter, Read, Seek, Write};
 use std::path::Path;
 use std::result::Result;
@@ -383,6 +383,21 @@ fn apply_patches(env: &PatchingEnv, mod_name: impl AsRef<str>) -> bool {
     });
     let patch_root = env.get_patch_path(mod_name);
     let source_root = env.get_source_path(mod_name);
+
+    for x in walkdir::WalkDir::new(&source_root) {
+        let x = handle_err!(x => {
+            eprintln!("ERROR: waling source folder for {}", mod_name);
+            false
+        });
+
+        if x.metadata().map(|x| x.is_file()).unwrap_or_default() 
+            && x.file_name().to_string_lossy().ends_with(".java") {
+            handle_err!(remove_file(x.path()) => {
+                eprintln!("ERROR: removing old source file {}", x.path().display());
+                false
+            });
+        }
+    }
 
     env.get_modified_classes(mod_name)
         .filter_map(|class_name| {

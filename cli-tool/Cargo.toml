@@ -17,6 +17,7 @@ itertools = "0.10"
 tempfile = "3"
 yaml-rust = "0.4"
 diffy = { path = "./diffy" }
+walkdir = "2.3.3"
 
 [dev-dependencies]
 serde_test = "1"
