@@ -1,6 +1,6 @@
 use std::env::{args, Args};
-use std::fs::{File, remove_file};
-use std::io::{BufReader, BufWriter, Read, Seek, Write};
+use std::fs::{create_dir_all, File, remove_file};
+use std::io::{BufReader, BufWriter, ErrorKind, Read, Seek, Write};
 use std::path::Path;
 use std::result::Result;
 
@@ -383,6 +383,11 @@ fn apply_patches(env: &PatchingEnv, mod_name: impl AsRef<str>) -> bool {
     });
     let patch_root = env.get_patch_path(mod_name);
     let source_root = env.get_source_path(mod_name);
+
+    handle_err!(create_dir_all(&source_root) => {
+        eprintln!("ERROR: creating source folder for {}", mod_name);
+        false
+    });
 
     for x in walkdir::WalkDir::new(&source_root) {
         let x = handle_err!(x => {
