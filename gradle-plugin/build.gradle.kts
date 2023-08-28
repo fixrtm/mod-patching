@@ -31,7 +31,7 @@ dependencies {
     implementation("org.ow2.asm:asm:9.5")
     implementation("org.ow2.asm:asm-commons:9.5")
     implementation("org.ow2.asm:asm-tree:9.5")
-    implementation("org.snakeyaml:snakeyaml-engine:2.6")
+    implementation("org.snakeyaml:snakeyaml-engine:2.7")
 
     testImplementation(platform("io.kotest:kotest-bom:4.6.3"))
     testImplementation("io.kotest:kotest-framework-api")

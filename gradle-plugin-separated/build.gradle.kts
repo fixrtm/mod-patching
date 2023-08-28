@@ -29,7 +29,7 @@ dependencies {
     shadow("org.ow2.asm:asm:9.5")
     shadow("org.ow2.asm:asm-commons:9.5")
     shadow("org.ow2.asm:asm-tree:9.5")
-    shadow("org.snakeyaml:snakeyaml-engine:2.6")
+    shadow("org.snakeyaml:snakeyaml-engine:2.7")
     //shadow("org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.2")
     //shadow("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
 }
