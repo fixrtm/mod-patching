@@ -28,9 +28,9 @@ dependencies {
     implementation("org.tukaani:xz:1.9")
 
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
-    implementation("org.ow2.asm:asm:9.5")
-    implementation("org.ow2.asm:asm-commons:9.5")
-    implementation("org.ow2.asm:asm-tree:9.5")
+    implementation("org.ow2.asm:asm:9.6")
+    implementation("org.ow2.asm:asm-commons:9.6")
+    implementation("org.ow2.asm:asm-tree:9.6")
     implementation("org.snakeyaml:snakeyaml-engine:2.6")
 
     testImplementation(platform("io.kotest:kotest-bom:4.6.3"))
